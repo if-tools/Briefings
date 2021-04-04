@@ -1,0 +1,14 @@
+@page "/find"
+
+@inject CurrentPage CurrentPage
+
+@code {
+    
+    protected override void OnInitialized()
+    {
+        CurrentPage.SetCurrentPageName("Find Briefing");
+        
+        base.OnInitialized();
+    }
+
+}

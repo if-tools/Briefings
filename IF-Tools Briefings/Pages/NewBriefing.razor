@@ -1,0 +1,14 @@
+@page "/new"
+
+@inject CurrentPage CurrentPage
+
+@code {
+    
+    protected override void OnInitialized()
+    {
+        CurrentPage.SetCurrentPageName("New Briefing");
+        
+        base.OnInitialized();
+    }
+
+}
