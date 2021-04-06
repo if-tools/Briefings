@@ -29,6 +29,7 @@
     border-radius: 10px 0 0 10px;
     transition: .1s right;
     font-size: 18px;
+    z-index: 99;
 }
 
 .notification-box .feather {

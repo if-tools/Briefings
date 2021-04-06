@@ -6,12 +6,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="EntityFramework" Version="6.4.4" />
       <PackageReference Include="Microsoft.AspNetCore.Components.Web.Extensions" Version="5.0.0-preview9.20513.1" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.0-preview.2.21154.2" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Data" />
     </ItemGroup>
 
     <ItemGroup>
@@ -24,6 +22,22 @@
       <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.woff" />
       <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\ICON-LICENSE" />
       <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\README.md" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="UserAttachments\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="UserAttachments\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="UserAttachments\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="UserAttachments\**" />
     </ItemGroup>
 
 </Project>

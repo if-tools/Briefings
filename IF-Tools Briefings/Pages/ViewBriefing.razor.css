@@ -1,0 +1,91 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    overflow-y: visible !important;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 50%;
+}
+
+.section:not(:last-of-type) {
+    margin-bottom: 15px;
+}
+
+.section:not(:first-of-type) {
+    margin-top: 40px;
+}
+
+.logo-image {
+    height: 50px;
+}
+
+.briefing-author {
+    font-size: 17px;
+    color: gray;
+}
+
+.briefing-airports {
+    margin: 15px 0;
+}
+
+.briefing-title, .briefing-airports, .briefing-author {
+    text-align: center;
+}
+ 
+.section-title {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.main-info {
+    width: 100%;
+}
+
+.main-info-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    height: 50px;
+    padding: 0 10px;
+    width: 100%;
+}
+
+.main-info-item:not(:last-of-type) {
+    border-bottom: 1px dashed lightgray;
+}
+
+.main-info-item * {
+    font-size: 18px;
+    letter-spacing: 1.5px;
+}
+
+.value {
+    font-weight: bold;
+}
+
+.flight-plan, .remarks {
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+@media (max-width: 1000px) {
+    .section {
+        width: 80%;
+    }
+}
+
+@media (max-width: 700px) {
+    .section {
+        width: 90%;
+    }
+}
+
