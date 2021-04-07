@@ -8,7 +8,7 @@ using Microsoft.JSInterop;
 
 namespace IFToolsBriefings.Pages
 {
-    public partial class NewBriefing
+    public partial class EditBriefing
     {
         private IJSObjectReference _jsModule;
     
@@ -16,12 +16,6 @@ namespace IFToolsBriefings.Pages
 
         private readonly DatabaseContext _databaseContext;
 
-        private bool _showLoadingIndicator;
-        private bool _showCompleted;
-        private int _newBriefingId;
-
-        private GetFlightPlanModal _fplModal;
-        
         private string _server = "casual";
         private string _departureAirport = "";
         private string _arrivalAirport = "";
@@ -39,14 +33,19 @@ namespace IFToolsBriefings.Pages
         
         private ElementReference _currentTimeElement;
 
-        public NewBriefing()
+        public EditBriefing()
         {
             _databaseContext = new DatabaseContext();
         }
         
         protected override void OnInitialized()
         {
-            CurrentPage.SetCurrentPageName("New Briefing");
+            CurrentPage.SetCurrentPageName("Edit Briefing");
+            
+            // var brief = new Briefing("", "", "", 0, 0, 0, 0, DateTime.Now, 0, "", "", "a", "", "", false);
+            
+            // _databaseContext.Briefings.Add(brief);
+            _databaseContext.SaveChanges();
             
             base.OnInitialized();
         }
@@ -55,8 +54,6 @@ namespace IFToolsBriefings.Pages
         {
             if (firstRender)
             {
-                _fplModal.FplReceived += FlightPlanReceived;
-
                 _jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/newBriefing.js");
             
                 await _jsModule.InvokeVoidAsync("createFilePond");
@@ -76,9 +73,6 @@ namespace IFToolsBriefings.Pages
                 CurrentPage.ShowNotification("Files are still uploading.");
                 return;
             }
-
-            _showLoadingIndicator = true;
-            await InvokeAsync(StateHasChanged);
 
             var newBriefing = new Briefing
             {
@@ -103,13 +97,6 @@ namespace IFToolsBriefings.Pages
 
             await _databaseContext.Briefings.AddAsync(newBriefing);
             await _databaseContext.SaveChangesAsync();
-            
-            _showLoadingIndicator = false;
-            _showCompleted = true;
-            _newBriefingId = newBriefing.Id;
-            
-            await _jsModule.InvokeVoidAsync("unregisterEvents");
-            await InvokeAsync(StateHasChanged);
         }
 
         private bool ValidateInputData()
@@ -120,17 +107,11 @@ namespace IFToolsBriefings.Pages
                                                              || string.IsNullOrWhiteSpace(_flightPlan)
                                                              || string.IsNullOrEmpty(_editPassword))
             {
-                CurrentPage.ShowNotification("Check the required fields.");
+                CurrentPage.ShowNotification("Check required fields.");
                 return false;
             }
 
             return true;
-        }
-
-        private void FlightPlanReceived(string fpl)
-        {
-            _flightPlan = fpl;
-            StateHasChanged();
         }
 
         private bool GetCategoryState(int categoryId)

@@ -56,7 +56,7 @@ namespace IFToolsBriefings.Controllers
         {
             CheckAttachmentsDirectory();
             
-            var content = "";
+            string content;
             using (StreamReader sr = new StreamReader(Request.Body))
             {
                 content = await sr.ReadToEndAsync();

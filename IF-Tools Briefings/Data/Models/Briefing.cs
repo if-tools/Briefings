@@ -22,11 +22,11 @@ namespace IFToolsBriefings.Data.Models
 
         public int FlightLevel { get; set; }
         
-        public int CruiseSpeed { get; set; }
+        public double CruiseSpeed { get; set; }
         
         public DateTime DepartureTime { get; set; }
 
-        // presented in Ticks
+        // stored in Ticks
         public long TimeEnroute { get; set; }
         
         public string FlightPlan { get; set; }
