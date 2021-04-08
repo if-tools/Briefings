@@ -15,6 +15,9 @@ namespace IFToolsBriefings.Pages
         private readonly Dictionary<int, bool> _categoryStates = new ();
 
         private readonly DatabaseContext _databaseContext;
+        
+        [Parameter]
+        public string BriefingId { get; set; }
 
         private string _server = "casual";
         private string _departureAirport = "";

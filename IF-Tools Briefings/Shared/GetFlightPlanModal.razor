@@ -35,7 +35,7 @@
         StateHasChanged();
     }
 
-    public void Hide()
+    private void Hide()
     {
         _isShown = false;
         
@@ -61,9 +61,7 @@
         {
             responseFpl = await reader.ReadToEndAsync();
         }
-            
-        Console.WriteLine(responseFpl);
-
+        
         if (responseFpl == "notfound")
         {
             CurrentPage.ShowNotification("That flight does not exist.");

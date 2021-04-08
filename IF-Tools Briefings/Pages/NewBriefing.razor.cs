@@ -22,7 +22,7 @@ namespace IFToolsBriefings.Pages
 
         private GetFlightPlanModal _fplModal;
         
-        private string _server = "casual";
+        private string _server = "Casual";
         private string _departureAirport = "";
         private string _arrivalAirport = "";
         private string _departureRunway = "";

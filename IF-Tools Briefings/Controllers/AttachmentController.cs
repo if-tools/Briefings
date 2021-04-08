@@ -13,7 +13,7 @@ namespace IFToolsBriefings.Controllers
     [ApiController]
     public class AttachmentController : Controller
     {
-        private const string BaseAttachmentsPath = "UserAttachments";
+        private const string BaseAttachmentsPath = "wwwroot/images/attachments";
         private readonly DatabaseContext _databaseContext = new();
 
         [HttpPost("[action]")]

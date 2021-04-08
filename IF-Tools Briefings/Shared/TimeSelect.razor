@@ -3,13 +3,13 @@
     <select class="input-value" @bind="@_hours">
         @for (int i = 0; i <= HoursCount; i++)
         {
-            <option value="@i">@GetTimeNumber(i)</option>
+            <option value="@i">@AddZeroesIfNeeded(i)</option>
         }
     </select>
     <select class="input-value" @bind="@_minutes">
         @for (int i = 0; i <= 59; i++)
         {
-            <option value="@i">@GetTimeNumber(i)</option>
+            <option value="@i">@AddZeroesIfNeeded(i)</option>
         }
     </select>
 </div>
@@ -40,9 +40,9 @@
         base.OnInitialized();
     }
 
-    private string GetTimeNumber(int forNumber)
+    private string AddZeroesIfNeeded(int number)
     {
-        return forNumber.ToString().Length == 1 ? "0" + forNumber : forNumber.ToString();
+        return number.ToString().Length == 1 ? "0" + number : number.ToString();
     }
 
     public DateTime GetDateTime()
