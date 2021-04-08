@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using IFToolsBriefings.Data;
@@ -47,7 +48,7 @@ namespace IFToolsBriefings.Pages
         protected override void OnInitialized()
         {
             CurrentPage.SetCurrentPageName("New Briefing");
-            
+
             base.OnInitialized();
         }
 

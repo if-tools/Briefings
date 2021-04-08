@@ -92,6 +92,11 @@
     letter-spacing: 1px;
 }
 
+.no-attachments {
+    color: gray;
+    font-size: 18px;
+}
+
 .gallery-item {
     display: flex;
     flex-direction: column;

@@ -1,6 +1,10 @@
 ﻿@inherits LayoutComponentBase
 @inject CurrentPage CurrentPage
 
+@using Microsoft.AspNetCore.Components.Web.Extensions.Head;
+
+<Title value="@CurrentPage.CurrentPageName"></Title>
+
 <div class="page">
     <div class="notification-box @(CurrentPage.NotificationBoxShown ? "out" : "")">
         <span class="feather icon-info" aria-hidden="true"></span>

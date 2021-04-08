@@ -4,6 +4,7 @@
 
 @inject CurrentPage CurrentPage
 @inject IJSRuntime JsRuntime
+@inject NavigationManager NavManager
 
 <!-- FilePond styles -->
 <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css" rel="stylesheet">
@@ -18,14 +19,16 @@
 </style>
 <!-- End FilePond styles -->
 
+<AuthenticationModal @ref="_authModal" IsShown="@(!_authenticated)"></AuthenticationModal>
+
 <h5 class="subtitle" @onclick="() => ChangeCategoryState(0)">General Data <span class="feather icon-chevron-@(GetCategoryState(0) ? "down" : "right")"></span></h5>
 <div class="category" data-visible="@GetCategoryState(0).ToString()">
     <div class="input-item">
         <span class="input-title">Server <span class="important">*</span></span>
         <select @bind="_server" class="input-value server-select">
-            <option value="casual">Casual Server</option>
-            <option value="training">Training Server</option>
-            <option value="expert">Expert Server</option>
+            <option value="Casual">Casual Server</option>
+            <option value="Training">Training Server</option>
+            <option value="Expert">Expert Server</option>
         </select>
     </div>
     <div class="input-item">
@@ -81,18 +84,21 @@
 </div>
 <h5 class="subtitle" @onclick="() => ChangeCategoryState(2)">Security <span class="feather icon-chevron-@(GetCategoryState(2) ? "down" : "right")"></span></h5>
 <div class="category" data-visible="@GetCategoryState(2).ToString()">
-    <InfoDialog Information="IF-Tools stores passwords in hashes, and they are not recoverable."></InfoDialog>
+    <InfoDialog Information="You can't change your passwords, but you can make your briefing public if it wasn't before."></InfoDialog>
     <div class="input-item">
-        <span class="input-title">Edit Password <span class="important">*</span></span>
-        <input type="password" placeholder="Used to edit this briefing later on." @bind="_editPassword" class="input-value">
+        <span class="input-title">Briefing Type</span>
+        <select @bind="_briefingType" class="input-value type-select">
+            <option value="Public">Public</option>
+            <option value="Private">Private</option>
+        </select>
     </div>
     <div class="input-item">
         <span class="input-title">View Password</span>
-        <input type="password" placeholder="Used to view the briefing. Leave empty if you want this briefing to be public." @bind="_viewPassword" class="input-value">
+        <input type="password" placeholder="Used to view the briefing. Only used when briefing type is set to Private." @bind="_viewPassword" class="input-value">
     </div>
 </div>
 
 <div class="submit">
     <button class="button-submit btn btn-primary" @onclick="Submit">Submit</button>
-    <LoadingIndicator IsShown="true" IsInline="true" AddLeftMargin="true"></LoadingIndicator>
+    <LoadingIndicator IsShown="@_showLoadingIndicator" IsInline="true" AddLeftMargin="true"></LoadingIndicator>
 </div>

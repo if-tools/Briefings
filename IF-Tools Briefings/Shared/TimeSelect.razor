@@ -45,6 +45,20 @@
         return number.ToString().Length == 1 ? "0" + number : number.ToString();
     }
 
+    public void SetDateTime(DateTime dateTime)
+    {
+        _hours = dateTime.Hour;
+        _minutes = dateTime.Minute;
+        StateHasChanged();
+    }
+    
+    public void SetTimeSpan(TimeSpan timeSpan)
+    {
+        _hours = timeSpan.Hours;
+        _minutes = timeSpan.Minutes;
+        StateHasChanged();
+    }
+
     public DateTime GetDateTime()
     {
         var now = DateTime.UtcNow;

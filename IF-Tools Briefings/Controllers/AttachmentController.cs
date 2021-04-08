@@ -102,6 +102,18 @@ namespace IFToolsBriefings.Controllers
                 return BadRequest($"Error encountered on server. Message:'{e.Message}' when writing an object.");
             }
         }
+        
+        [HttpGet("[action]")]
+        public async Task<ActionResult> Load(string id)
+        {
+            var attachment = _databaseContext.Attachments.SingleOrDefault(i => i.Guid == id);
+            if (attachment == null) return BadRequest("File does not exist.");
+
+            string fileName = attachment.FileName;
+            string fileType = fileName.Split('.')[1];
+
+            return File(new FileStream(Path.Combine(BaseAttachmentsPath, fileName), FileMode.Open), fileType == "png" ? "image/png" : "image/jpeg", fileName);        
+        }
 
         private void CheckAttachmentsDirectory()
         {

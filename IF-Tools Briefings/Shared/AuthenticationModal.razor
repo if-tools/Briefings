@@ -1,0 +1,43 @@
+@using System.IO
+@using System.Net
+@inject CurrentPage CurrentPage
+
+@if (IsShown)
+{
+    <div class="wrapper">
+        <div class="auth-modal">
+            <div class="modal-head">
+                <span class="modal-title">Authorization</span>
+            </div>
+            <div class="modal-body">
+                <div class="input-item">
+                    <span class="input-title">Edit Password</span>
+                    <input type="password" placeholder="This briefing's edit password." @bind="_password" class="input-value">
+                </div>
+                <button class="button-submit btn btn-primary" @onclick="CallAuthenticate">Submit</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+
+    public Action<string> Authenticate;
+    private string _password = "";
+    
+    [Parameter]
+    public bool IsShown { get; set; }
+
+    public void Hide()
+    {
+        IsShown = false;
+        
+        StateHasChanged();
+    }
+
+    private void CallAuthenticate()
+    {
+        Authenticate(_password);
+    }
+    
+}

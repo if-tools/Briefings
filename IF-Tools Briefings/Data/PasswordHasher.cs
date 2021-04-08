@@ -57,6 +57,6 @@ namespace IFToolsBriefings.Data
     
     public class HashingOptions
     {
-        public int Iterations { get; } = 10000;
+        public int Iterations { get; } = 1000;
     }
 }

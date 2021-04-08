@@ -5,13 +5,10 @@
 
 @using IFToolsBriefings.Data.Models
 @using IFToolsBriefings.Data
-@using Microsoft.AspNetCore.Components.Web.Extensions.Head
 
 @inject CurrentPage CurrentPage
 @inject NavigationManager NavManager
 @inject IJSRuntime JsRuntime
-
-<Title value="@($"#{BriefingId} - Briefings")"></Title>
 
 <style> .content { height: 100vh } </style>
 
@@ -67,19 +64,26 @@
     {
         <div class="section section-remarks">
             <h4 class="section-title">Remarks</h4>
-            <p class="remarks">@_briefing.Remarks</p>
+            <p class="remarks">@((MarkupString)_briefing.Remarks.Replace("\n", "<br>"))</p>
         </div>
     }
     <div class="section section-attachments">
         <h4 class="section-title">Attachments</h4>
-        <div class="attachments-gallery">
-            @foreach (var attachment in _attachments)
-            {
-                <a href="@GetPathForAttachment(attachment)" class="gallery-item">
-                    <img class="attachment-preview" alt="attachment" src="@GetPathForAttachment(attachment)">
-                </a>
-            }
-        </div>
+        @if (_attachments.Count > 0)
+        {
+            <div class="attachments-gallery">
+                @foreach (var attachment in _attachments)
+                {
+                    <a href="@GetPathForAttachment(attachment)" class="gallery-item">
+                        <img class="attachment-preview" alt="attachment" src="@GetPathForAttachment(attachment)">
+                    </a>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="no-attachments">Nothing attached.</p>
+        }
     </div>
 </div>
 
@@ -110,11 +114,12 @@
             
             return;
         }
+        
+        CurrentPage.SetCurrentPageName($"#{BriefingId} - Briefings");
 
         _briefing = _databaseContext.Briefings.SingleOrDefault(entity => entity.Id == _actualBriefingId);
         if (_briefing == null)
         {
-            CurrentPage.ShowNotification("Cannot find that briefing.");
             NavManager.NavigateTo("/");
             
             return;
