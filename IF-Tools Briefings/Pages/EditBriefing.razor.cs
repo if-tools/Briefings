@@ -137,7 +137,7 @@ namespace IFToolsBriefings.Pages
 
             _editedBriefing.ViewPasswordHash = _briefingType == "Public"
                 ? ""
-                : string.IsNullOrWhiteSpace(_viewPassword) ? "" : PasswordHasher.Hash(_viewPassword);
+                : string.IsNullOrWhiteSpace(_viewPassword) ? _editedBriefing.ViewPasswordHash : PasswordHasher.Hash(_viewPassword);
 
             await _databaseContext.SaveChangesAsync();
             

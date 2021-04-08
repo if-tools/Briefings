@@ -52,5 +52,7 @@ namespace IFToolsBriefings.Data.Models
         {
             return TimeSpan.FromTicks(TimeEnroute);
         }
+
+        public static Briefing Default => new Briefing();
     }
 }

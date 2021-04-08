@@ -14,57 +14,59 @@
 
 <link href="css/magnific-popup.css" rel="stylesheet">
 
+<AuthenticationModal @ref="_authModal" IsShown="@(!_authenticated)"></AuthenticationModal>
+
 <div class="wrapper">
     <div class="section section-title">
         <img class="logo-image" alt="logo" src="images/logos/logo.png">
     </div>
     <div class="section section-description">
         <h3 class="briefing-title">Briefing #@_actualBriefingId <a href="/b/@_actualBriefingId/edit"><span class="feather icon-edit"></span></a></h3>
-        <h3 class="briefing-airports">@_briefing.Origin - @_briefing.Destination</h3>
-        <span class="briefing-author">@(!string.IsNullOrWhiteSpace(_briefing.Author) ? $"Made by {_briefing.Author}" : "Anonymous")</span>
+        <h3 class="briefing-airports">@_displayBriefing.Origin - @_displayBriefing.Destination</h3>
+        <span class="briefing-author">@(!string.IsNullOrWhiteSpace(_displayBriefing.Author) ? $"Made by {_displayBriefing.Author}" : "Anonymous")</span>
     </div>
     <div class="section section-main-info">
         <h4 class="section-title">Main Info</h4>
         <div class="main-info">
             <div class="main-info-item">
                 <span class="key">Server</span>
-                <span class="value">@_briefing.Server</span>
+                <span class="value">@_displayBriefing.Server</span>
             </div>
             <div class="main-info-item">
                 <span class="key">Dep. RWY</span>
-                <span class="value">@_briefing.OriginRunway</span>
+                <span class="value">@_displayBriefing.OriginRunway</span>
             </div>
             <div class="main-info-item">
                 <span class="key">Arr. RWY</span>
-                <span class="value">@_briefing.DestinationRunway</span>
+                <span class="value">@_displayBriefing.DestinationRunway</span>
             </div>
             <div class="main-info-item">
                 <span class="key">Flight Level</span>
-                <span class="value">@("FL" + _briefing.FlightLevel)</span>
+                <span class="value">@("FL" + _displayBriefing.FlightLevel)</span>
             </div>
             <div class="main-info-item">
                 <span class="key">Cruise SPD</span>
-                <span class="value">@("M" + _briefing.CruiseSpeed)</span>
+                <span class="value">@("M" + _displayBriefing.CruiseSpeed)</span>
             </div>
             <div class="main-info-item">
                 <span class="key">Time Enroute</span>
-                <span class="value">@(GetTimeEnrouteString(_briefing.GetTimeEnroute()))</span>
+                <span class="value">@(GetTimeEnrouteString(_displayBriefing.GetTimeEnroute()))</span>
             </div>
             <div class="main-info-item">
                 <span class="key">Departure Time</span>
-                <span class="value">@(GetDepartureTimeString(_briefing.DepartureTime) + "Z")</span>
+                <span class="value">@(GetDepartureTimeString(_displayBriefing.DepartureTime) + "Z")</span>
             </div>
         </div>
     </div>
     <div class="section section-flight-plan">
         <h4 class="section-title">Flight Plan</h4>
-        <p class="flight-plan">@_briefing.FlightPlan</p>
+        <p class="flight-plan">@_displayBriefing.FlightPlan</p>
     </div>
-    @if (!string.IsNullOrWhiteSpace(_briefing.Remarks))
+    @if (!string.IsNullOrWhiteSpace(_displayBriefing.Remarks))
     {
         <div class="section section-remarks">
             <h4 class="section-title">Remarks</h4>
-            <p class="remarks">@((MarkupString)_briefing.Remarks.Replace("\n", "<br>"))</p>
+            <p class="remarks">@((MarkupString)_displayBriefing.Remarks.Replace("\n", "<br>"))</p>
         </div>
     }
     <div class="section section-attachments">
@@ -93,10 +95,16 @@
     public string BriefingId { get; set; }
 
     private int _actualBriefingId;
-    
+
+    private Briefing _displayBriefing = Briefing.Default;
     private Briefing _briefing;
     private List<FileAttachment> _attachments = new();
-    
+
+    private IJSObjectReference _jsModule;
+
+    private AuthenticationModal _authModal;
+    private bool _authenticated;
+
     private readonly DatabaseContext _databaseContext;
         
     private const string BaseAttachmentsPath = "images/attachments/";
@@ -125,6 +133,56 @@
             return;
         }
 
+        _authenticated = string.IsNullOrWhiteSpace(_briefing.ViewPasswordHash);
+
+        if (_authenticated)
+        {
+            _displayBriefing = _briefing;
+            AddAttachments();
+        }
+        
+        base.OnInitialized();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _authModal.Authenticate += Authenticate;
+            
+            _jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/viewBriefing.js");
+        }
+    }
+    
+    private void Authenticate(string password)
+    {
+        if (string.IsNullOrWhiteSpace(password)) return;
+            
+        if (PasswordHasher.Check(_briefing.EditPasswordHash, password))
+        {
+            _authenticated = true;
+            _authModal.Hide();
+            _displayBriefing = _briefing;
+            AddAttachments();
+            
+            StateHasChanged();
+        }
+        else
+        {
+            CurrentPage.ShowNotification("Wrong password.");
+            return;
+        }
+            
+        _jsModule.InvokeVoidAsync("initMagnificPopup");
+    }
+
+    private string GetPathForAttachment(FileAttachment attachment)
+    {
+        return BaseAttachmentsPath + attachment.FileName;
+    }
+
+    private void AddAttachments()
+    {
         if (!string.IsNullOrWhiteSpace(_briefing.Attachments))
         {
             foreach (var attachmentGuid in _briefing.AttachmentsArray)
@@ -135,22 +193,7 @@
             }
         }
         
-        base.OnInitialized();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            var jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/viewBriefing.js");
-            
-            await jsModule.InvokeVoidAsync("initMagnificPopup");
-        }
-    }
-
-    private string GetPathForAttachment(FileAttachment attachment)
-    {
-        return BaseAttachmentsPath + attachment.FileName;
+        StateHasChanged();
     }
 
     private string GetTimeEnrouteString(TimeSpan timeEnroute)
