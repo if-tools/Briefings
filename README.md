@@ -26,3 +26,6 @@ Alternatively, you can use the `example-database.db` database located in the roo
 
 ## Contributing
 Want to contribute? That's great, thanks! Fork the `develop` branch of this repo to get started, and then open a new Pull Request when you've made your desired changes (don't forget to describe them).
+
+## Credits
+IF-Tools uses [FilePond](https://pqina.nl/filepond/) for file uploads and [MagnificPopup](https://dimsemenov.com/plugins/magnific-popup/) for image galleries.  
