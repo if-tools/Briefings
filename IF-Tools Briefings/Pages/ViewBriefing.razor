@@ -59,7 +59,7 @@
         </div>
     </div>
     <div class="section section-flight-plan">
-        <h4 class="section-title">Flight Plan</h4>
+        <h4 class="section-title">Flight Plan <span class="feather icon-clipboard" onclick="navigator.clipboard.writeText('@_displayBriefing.FlightPlan')"></span></h4>
         <p class="flight-plan">@_displayBriefing.FlightPlan</p>
     </div>
     @if (!string.IsNullOrWhiteSpace(_displayBriefing.Remarks))

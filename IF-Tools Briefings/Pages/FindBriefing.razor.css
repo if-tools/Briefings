@@ -106,6 +106,10 @@ tr.clickable:hover {
 }
 
 @media (max-width: 640.98px) {
+    .mobile-page-title {
+        display: block;
+    }
+    
     .wrapper {
         height: calc(100% - 70px);
     }

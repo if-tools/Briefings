@@ -92,6 +92,16 @@
     letter-spacing: 1px;
 }
 
+.icon-clipboard {
+    margin-left: 5px;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.icon-clipboard:hover {
+    color: gray;
+}
+
 .no-attachments {
     color: gray;
     font-size: 18px;
