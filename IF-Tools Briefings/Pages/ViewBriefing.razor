@@ -14,7 +14,7 @@
 
 <link href="css/magnific-popup.css" rel="stylesheet">
 
-<AuthenticationModal @ref="_authModal" IsShown="@(!_authenticated)"></AuthenticationModal>
+<AuthenticationModal @ref="_authModal" IsShown="@(!_authenticated)" IsViewPassword="@true"></AuthenticationModal>
 
 <div class="wrapper">
     <div class="section section-title">
@@ -71,21 +71,21 @@
     }
     <div class="section section-attachments">
         <h4 class="section-title">Attachments</h4>
-        @if (_attachments.Count > 0)
-        {
-            <div class="attachments-gallery">
+        <div class="attachments-gallery">
+            @if (_attachments.Count > 0)
+            {
                 @foreach (var attachment in _attachments)
                 {
                     <a href="@GetPathForAttachment(attachment)" class="gallery-item">
                         <img class="attachment-preview" alt="attachment" src="@GetPathForAttachment(attachment)">
                     </a>
                 }
-            </div>
-        }
-        else
-        {
-            <p class="no-attachments">Nothing attached.</p>
-        }
+            }
+            else
+            {
+                <p class="no-attachments">Nothing attached.</p>
+            }
+        </div>
     </div>
 </div>
 
@@ -151,6 +151,8 @@
             _authModal.Authenticate += Authenticate;
             
             _jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/viewBriefing.js");
+            if(_authenticated)
+                await _jsModule.InvokeVoidAsync("initMagnificPopup");
         }
     }
     
@@ -158,7 +160,7 @@
     {
         if (string.IsNullOrWhiteSpace(password)) return;
             
-        if (PasswordHasher.Check(_briefing.EditPasswordHash, password))
+        if (PasswordHasher.Check(_briefing.ViewPasswordHash, password))
         {
             _authenticated = true;
             _authModal.Hide();

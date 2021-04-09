@@ -27,6 +27,8 @@ namespace IFToolsBriefings.Pages
         private bool _authenticated;
         private AuthenticationModal _authModal;
         
+        private GetFlightPlanModal _fplModal;
+
         private Briefing _editedBriefing;
 
         private string _server = "Casual";
@@ -78,7 +80,8 @@ namespace IFToolsBriefings.Pages
             if (firstRender)
             {
                 _authModal.Authenticate += Authenticate;
-                
+                _fplModal.FplReceived += FlightPlanReceived;
+
                 _jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/editBriefing.js");
             }
         }
@@ -105,6 +108,7 @@ namespace IFToolsBriefings.Pages
 
         private async void Submit()
         {
+            if (!_authenticated) return;
             if (!ValidateInputData()) return;
             
             var filepondStatus = await _jsModule.InvokeAsync<bool>("checkIfFilepondBusy");
@@ -180,6 +184,12 @@ namespace IFToolsBriefings.Pages
             }
 
             return true;
+        }
+        
+        private void FlightPlanReceived(string fpl)
+        {
+            _flightPlan = fpl;
+            StateHasChanged();
         }
 
         private bool GetCategoryState(int categoryId)

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using IFToolsBriefings.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace IFToolsBriefings.Controllers
 {
@@ -106,7 +107,7 @@ namespace IFToolsBriefings.Controllers
         [HttpGet("[action]")]
         public async Task<ActionResult> Load(string id)
         {
-            var attachment = _databaseContext.Attachments.SingleOrDefault(i => i.Guid == id);
+            var attachment = await _databaseContext.Attachments.SingleOrDefaultAsync(i => i.Guid == id);
             if (attachment == null) return BadRequest("File does not exist.");
 
             string fileName = attachment.FileName;

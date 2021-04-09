@@ -1,5 +1,6 @@
 @using System.IO
 @using System.Net
+
 @inject CurrentPage CurrentPage
 
 @if (_isShown)
@@ -49,19 +50,28 @@
             CurrentPage.ShowNotification("Callsign cannot be empty.");
             return;
         }
-            
-        HttpWebRequest request = (HttpWebRequest)WebRequest.Create($"http://localhost:5000/api/IfApi/GetFlightFpl?callSign={CallSign}");
+
+        var request = (HttpWebRequest) WebRequest.Create($"http://localhost:5000/api/IfApi/GetFlightFpl?callSign={CallSign}");
         request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+        
 
         string responseFpl;
-            
-        using(HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-        await using(Stream stream = response.GetResponseStream())
-        using(StreamReader reader = new StreamReader(stream))
+
+        try
         {
-            responseFpl = await reader.ReadToEndAsync();
+            using (var response = (HttpWebResponse) await request.GetResponseAsync())
+            await using (var stream = response.GetResponseStream())
+            using (var reader = new StreamReader(stream))
+            {
+                responseFpl = await reader.ReadToEndAsync();
+            }
+        } 
+        catch
+        {
+            CurrentPage.ShowNotification("Cannot retrieve data.");
+            return;
         }
-        
+
         if (responseFpl == "notfound")
         {
             CurrentPage.ShowNotification("That flight does not exist.");

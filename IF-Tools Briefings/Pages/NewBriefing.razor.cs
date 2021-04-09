@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using IFToolsBriefings.Data;
@@ -164,6 +163,7 @@ namespace IFToolsBriefings.Pages
             _jsModule.InvokeVoidAsync("unregisterEvents");
 
             JsRuntime.InvokeVoidAsync("stopTime");
+            
             _databaseContext.Dispose();
         }
     }

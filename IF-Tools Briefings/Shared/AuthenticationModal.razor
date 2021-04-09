@@ -1,6 +1,8 @@
 @using System.IO
 @using System.Net
+
 @inject CurrentPage CurrentPage
+@inject NavigationManager NavManager
 
 @if (IsShown)
 {
@@ -8,11 +10,15 @@
         <div class="auth-modal">
             <div class="modal-head">
                 <span class="modal-title">Authorization</span>
+                @if (ShowCloseButton)
+                {
+                    <span class="modal-close feather icon-x" tabindex="0" @onkeydown="Hide" @onclick="Hide"></span>
+                }
             </div>
             <div class="modal-body">
                 <div class="input-item">
-                    <span class="input-title">Edit Password</span>
-                    <input type="password" placeholder="This briefing's edit password." @bind="_password" class="input-value">
+                    <span class="input-title">@(IsViewPassword ? "View" : "Edit") Password</span>
+                    <input type="password" placeholder="This briefing's @(IsViewPassword ? "view" : "edit") password." @bind="_password" class="input-value">
                 </div>
                 <button class="button-submit btn btn-primary" @onclick="CallAuthenticate">Submit</button>
             </div>
@@ -27,6 +33,12 @@
     
     [Parameter]
     public bool IsShown { get; set; }
+    
+    [Parameter]
+    public bool IsViewPassword { get; set; }
+    
+    [Parameter]
+    public bool ShowCloseButton { get; set; }
 
     public void Hide()
     {
