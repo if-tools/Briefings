@@ -7,7 +7,7 @@
 
 <div class="wrapper">
     <h4 class="greeting">Welcome to Briefings.</h4>
-    <p class="current-time" @ref="timeElement"></p>
+    <p class="current-time"></p>
     <div class="buttons">
         <div class="button">
             <a class="button-body" href="/new">
@@ -26,8 +26,6 @@
 
 @code {
     
-    ElementReference timeElement;
-
     protected override void OnInitialized()
     {
         CurrentPage.SetCurrentPageName("Main");
@@ -38,7 +36,7 @@
     {
         if (firstRender)
         {
-            await JsRuntime.InvokeVoidAsync("startTime", timeElement);
+            await JsRuntime.InvokeVoidAsync("startTime");
         }
     }
     

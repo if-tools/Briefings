@@ -45,9 +45,7 @@ namespace IFToolsBriefings.Pages
         private string _remarks = "";
         private string _viewPassword = "";
         private string _briefingType = "Public";
-
-        private ElementReference _currentTimeElement;
-
+        
         public EditBriefing()
         {
             _databaseContext = new DatabaseContext();
@@ -169,7 +167,7 @@ namespace IFToolsBriefings.Pages
             
             _jsModule.InvokeVoidAsync("registerEvents");
             _jsModule.InvokeVoidAsync("createFilePond", JsonConvert.SerializeObject(_editedBriefing.AttachmentsArray.ToArray<object>()));
-            JsRuntime.InvokeVoidAsync("startTime", _currentTimeElement);
+            JsRuntime.InvokeVoidAsync("startTime");
         }
 
         private bool ValidateInputData()

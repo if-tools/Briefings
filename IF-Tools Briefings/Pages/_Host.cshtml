@@ -70,8 +70,12 @@
 <script>
     let clock;
     
-    function startTime(element) {
+    function startTime() {
         let date = new Date();
+        
+        let element = document.querySelector(".current-time");
+        
+        if (element === null || element.innerHTML === null) return;
         
         element.innerHTML = date.getUTCHours() + ":" + date.getUTCMinutes() + ":" + date.getUTCSeconds() + " UTC";
         clock = setTimeout(startTime.bind(null, element), 1000);

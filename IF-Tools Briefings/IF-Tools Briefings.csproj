@@ -11,33 +11,4 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.0-preview.2.21154.2" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     </ItemGroup>
-
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\FONT-LICENSE" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\css\open-iconic-bootstrap.min.css" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.eot" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.otf" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.ttf" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.woff" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\ICON-LICENSE" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\README.md" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="UserAttachments\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <EmbeddedResource Remove="UserAttachments\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="UserAttachments\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Remove="UserAttachments\**" />
-    </ItemGroup>
-
 </Project>

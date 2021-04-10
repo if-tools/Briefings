@@ -36,8 +36,6 @@ namespace IFToolsBriefings.Pages
         private string _remarks = "";
         private string _editPassword = "";
         private string _viewPassword = "";
-        
-        private ElementReference _currentTimeElement;
 
         public NewBriefing()
         {
@@ -62,7 +60,7 @@ namespace IFToolsBriefings.Pages
                 await _jsModule.InvokeVoidAsync("createFilePond");
                 await _jsModule.InvokeVoidAsync("registerEvents");
 
-                await JsRuntime.InvokeVoidAsync("startTime", _currentTimeElement);
+                await JsRuntime.InvokeVoidAsync("startTime");
             }
         }
 

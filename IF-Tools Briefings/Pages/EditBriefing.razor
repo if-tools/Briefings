@@ -57,7 +57,7 @@
         <input type="number" step="0.01" placeholder="0.80" @bind="_cruiseSpeed" class="input-value uppercase-text">
     </div>
     <div class="input-item">
-        <span class="input-title">Departure Time (Zulu, today) <span class="important">*</span> <p class="current-time" @ref="_currentTimeElement"></p></span>
+        <span class="input-title">Departure Time (Zulu, today) <span class="important">*</span> <p class="current-time"></p></span>
         <TimeSelect @ref="@_departureTimeSelect" HoursCount="23" DepartureTimeSelect="@true"></TimeSelect>
     </div>
     <div class="input-item">
