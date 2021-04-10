@@ -1,0 +1,91 @@
+@using System.IO
+@using System.Net
+
+@inject CurrentPage CurrentPage
+
+@if (_isShown)
+{
+    <div class="wrapper">
+        <div class="get-fpl-modal">
+            <div class="modal-head">
+                <span class="modal-title">Get FPL from IF</span>
+                <span class="modal-close feather icon-x" tabindex="0" @onkeydown="Hide" @onclick="Hide"></span>
+            </div>
+            <div class="modal-body">
+                <div class="input-item">
+                    <span class="input-title">Callsign</span>
+                    <input type="text" placeholder="MUFFNS" @bind="CallSign" class="input-value">
+                </div>
+                <button class="button-submit btn btn-primary" @onclick="GetFpl">Submit</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+
+    public Action<string> FplReceived;
+    private string CallSign = "";
+    
+    bool _isShown;
+
+    public void Show()
+    {
+        _isShown = true;
+        
+        StateHasChanged();
+    }
+
+    private void Hide()
+    {
+        _isShown = false;
+        
+        StateHasChanged();
+    }
+
+    private async void GetFpl()
+    {
+        if (string.IsNullOrWhiteSpace(CallSign))
+        {
+            CurrentPage.ShowNotification("Callsign cannot be empty.");
+            return;
+        }
+
+        var request = (HttpWebRequest) WebRequest.Create($"http://localhost:5000/api/IfApi/GetFlightFpl?callSign={CallSign}");
+        request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+        
+
+        string responseFpl;
+
+        try
+        {
+            using (var response = (HttpWebResponse) await request.GetResponseAsync())
+            await using (var stream = response.GetResponseStream())
+            using (var reader = new StreamReader(stream))
+            {
+                responseFpl = await reader.ReadToEndAsync();
+            }
+        } 
+        catch
+        {
+            CurrentPage.ShowNotification("Cannot retrieve data.");
+            return;
+        }
+
+        if (responseFpl == "notfound")
+        {
+            CurrentPage.ShowNotification("That flight does not exist.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(responseFpl) || responseFpl.Trim() == "WPT")
+        {
+            CurrentPage.ShowNotification("That flight's FPL is empty.");
+            return;
+        }
+
+        FplReceived(responseFpl);
+        Hide();
+    }
+    
+}

@@ -1,0 +1,74 @@
+
+<div class="wrapper">
+    <select class="input-value" @bind="@_hours">
+        @for (int i = 0; i <= HoursCount; i++)
+        {
+            <option value="@i">@AddZeroesIfNeeded(i)</option>
+        }
+    </select>
+    <select class="input-value" @bind="@_minutes">
+        @for (int i = 0; i <= 59; i++)
+        {
+            <option value="@i">@AddZeroesIfNeeded(i)</option>
+        }
+    </select>
+</div>
+
+@code {
+    
+    [Parameter]
+    public int HoursCount { get; set; }
+    
+    [Parameter]
+    public bool DepartureTimeSelect { get; set; }
+
+    private int _hours;
+    private int _minutes;
+
+    protected override void OnInitialized()
+    {
+        if (DepartureTimeSelect)
+        {
+            var now = DateTime.UtcNow;
+
+            _hours = now.Hour;
+            _minutes = now.Minute;
+            
+            StateHasChanged();
+        }
+        
+        base.OnInitialized();
+    }
+
+    private string AddZeroesIfNeeded(int number)
+    {
+        return number.ToString().Length == 1 ? "0" + number : number.ToString();
+    }
+
+    public void SetDateTime(DateTime dateTime)
+    {
+        _hours = dateTime.Hour;
+        _minutes = dateTime.Minute;
+        StateHasChanged();
+    }
+    
+    public void SetTimeSpan(TimeSpan timeSpan)
+    {
+        _hours = timeSpan.Hours;
+        _minutes = timeSpan.Minutes;
+        StateHasChanged();
+    }
+
+    public DateTime GetDateTime()
+    {
+        var now = DateTime.UtcNow;
+
+        return new DateTime(now.Year, now.Month, now.Day, _hours, _minutes, 0);
+    }
+
+    public TimeSpan GetTimeSpan()
+    {
+        return new(_hours, _minutes, 0);
+    }
+    
+}

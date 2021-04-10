@@ -1,0 +1,48 @@
+﻿@page "/"
+
+@inject CurrentPage CurrentPage
+@inject IJSRuntime JsRuntime
+
+@implements IDisposable
+
+<div class="wrapper">
+    <h4 class="greeting">Welcome to Briefings.</h4>
+    <p class="current-time"></p>
+    <div class="buttons">
+        <div class="button">
+            <a class="button-body" href="/new">
+                <span class="feather icon-file-plus"></span>
+                <span class="button-name">New Briefing</span>
+            </a>
+        </div>
+        <div class="button">
+            <a class="button-body" href="/find">
+                <span class="feather icon-search"></span>
+                <span class="button-name">Find Briefing</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+@code {
+    
+    protected override void OnInitialized()
+    {
+        CurrentPage.SetCurrentPageName("Main");
+        base.OnInitialized();
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JsRuntime.InvokeVoidAsync("startTime");
+        }
+    }
+    
+    public void Dispose()
+    {
+        JsRuntime.InvokeVoidAsync("stopTime");
+    }
+
+}

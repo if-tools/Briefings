@@ -1,0 +1,8 @@
+.input-value {
+    width: 100px;
+    height: 40px;
+}
+
+.input-value:last-of-type {
+    margin-left: 10px;
+}
