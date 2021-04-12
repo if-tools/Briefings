@@ -10,6 +10,10 @@
     overflow-y: auto;
 }
 
+form {
+    width: 100%;
+}
+
 .input-item {
     display: flex;
     flex-direction: column;
