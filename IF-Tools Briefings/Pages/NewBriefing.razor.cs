@@ -2,8 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using IFToolsBriefings.Data;
 using IFToolsBriefings.Data.Models;
-using IFToolsBriefings.Shared;
-using Microsoft.AspNetCore.Components;
+using IFToolsBriefings.Shared.Components;
 using Microsoft.JSInterop;
 
 namespace IFToolsBriefings.Pages

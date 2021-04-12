@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using IFToolsBriefings.Data;
 using IFToolsBriefings.Data.Models;
-using IFToolsBriefings.Shared;
+using IFToolsBriefings.Shared.Components;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Newtonsoft.Json;
