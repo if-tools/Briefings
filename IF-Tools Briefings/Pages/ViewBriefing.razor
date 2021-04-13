@@ -42,7 +42,7 @@
             </div>
             <div class="main-info-item">
                 <span class="key">Flight Level</span>
-                <span class="value">@("FL" + _displayBriefing.FlightLevel)</span>
+                <span class="value">@("FL" + GetFlightLevelToDisplay(_displayBriefing.FlightLevel))</span>
             </div>
             <div class="main-info-item">
                 <span class="key">Cruise SPD</span>
@@ -211,6 +211,11 @@
     private string AddZeroesIfNeeded(int number)
     {
         return number.ToString().Length == 1 ? "0" + number : number.ToString();
+    }
+
+    private string GetFlightLevelToDisplay(int flightLevel)
+    {
+        return $"{flightLevel:000}";
     }
 
 }

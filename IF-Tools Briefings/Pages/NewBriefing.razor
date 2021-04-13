@@ -1,6 +1,10 @@
 @page "/new"
 
+@using IFToolsBriefings.Data.Types
+
 @implements IDisposable
+
+@inherits BriefingCreation
 
 @inject CurrentPage CurrentPage
 @inject IJSRuntime JsRuntime
@@ -38,7 +42,7 @@ else
     <div class="category" data-visible="@GetCategoryState(0).ToString()">
         <div class="input-item">
             <span class="input-title">Server <span class="important">*</span></span>
-            <select @bind="_server" class="input-value server-select">
+            <select @bind="Server" class="input-value server-select">
                 <option value="Casual">Casual Server</option>
                 <option value="Training">Training Server</option>
                 <option value="Expert">Expert Server</option>
@@ -46,48 +50,49 @@ else
         </div>
         <div class="input-item">
             <span class="input-title">Departure Airport <span class="important">*</span></span>
-            <input type="text" placeholder="KLAX" @bind="_departureAirport" maxlength="4" class="input-value uppercase-text">
+            <input type="text" placeholder="KLAX" @bind="DepartureAirport" maxlength="4" class="input-value uppercase-text">
         </div>
         <div class="input-item">
             <span class="input-title">Arrival Airport <span class="important">*</span></span>
-            <input type="text" placeholder="KSFO" @bind="_arrivalAirport" maxlength="4" class="input-value uppercase-text">
+            <input type="text" placeholder="KSFO" @bind="ArrivalAirport" maxlength="4" class="input-value uppercase-text">
         </div>
         <div class="input-item">
             <span class="input-title">Departure Runway <span class="important">*</span></span>
-            <input type="text" placeholder="11L" @bind="_departureRunway" maxlength="3" class="input-value uppercase-text">
+            <input type="text" placeholder="11L" @bind="DepartureRunway" maxlength="3" class="input-value uppercase-text">
         </div>
         <div class="input-item">
             <span class="input-title">Arrival Runway <span class="important">*</span></span>
-            <input type="text" placeholder="26R" @bind="_arrivalRunway" maxlength="3" class="input-value uppercase-text">
+            <input type="text" placeholder="26R" @bind="ArrivalRunway" maxlength="3" class="input-value uppercase-text">
         </div>
         <div class="input-item">
             <span class="input-title">Flight Level (FL) <span class="important">*</span></span>
-            <input type="number" placeholder="350" @bind="_flightLevel" class="input-value">
+            <input type="number" placeholder="350" max="999" @bind="FlightLevel" class="input-value">
         </div>
         <div class="input-item">
-            <span class="input-title">Cruise Speed (Mach) <span class="important">*</span></span>
-            <input type="number" step="0.01" placeholder="0.80" @bind="_cruiseSpeed" class="input-value uppercase-text">
+            <span class="input-title">Cruise Speed <span class="important">*</span></span>
+            <input type="number" step="0.01" placeholder="0.80" max="999" @bind="CruiseSpeed" @onfocusout="UpdateCruiseSpeedDisplayedAsText" class="input-value uppercase-text">
+            <span class="input-comment">Will be displayed as @CruiseSpeedDisplayedAs.</span>
         </div>
         <div class="input-item">
             <span class="input-title">Departure Time (Zulu, today) <span class="important">*</span> <p class="current-time"></p></span>
-            <TimeSelect @ref="@_departureTimeSelect" HoursCount="23" DepartureTimeSelect="@true"></TimeSelect>
+            <TimeSelect @ref="@DepartureTimeSelect" HoursCount="23" DepartureTimeSelect="@true"></TimeSelect>
         </div>
         <div class="input-item">
             <span class="input-title">Time Enroute (ETE) <span class="important">*</span></span>
-            <TimeSelect @ref="@_timeEnrouteSelect" HoursCount="23"></TimeSelect>
+            <TimeSelect @ref="@TimeEnrouteSelect" HoursCount="23"></TimeSelect>
         </div>
         <div class="input-item">
             <span class="input-title">Flight Plan <span class="important">*</span></span>
-            <textarea class="input-value uppercase-text" placeholder="KLAX ... KSFO" @bind="_flightPlan"></textarea>
+            <textarea class="input-value uppercase-text" placeholder="KLAX ... KSFO" @bind="FlightPlan"></textarea>
             <button class="button-fpl-from-if btn btn-secondary" @onclick="@(() => _fplModal.Show())">Get from IF</button>
         </div>
         <div class="input-item">
             <span class="input-title">Author</span>
-            <input type="text" placeholder="The author of this briefing. Leave empty if you want it to be anonymous." @bind="_author" class="input-value">
+            <input type="text" placeholder="The author of this briefing. Leave empty if you want it to be anonymous." @bind="Author" class="input-value">
         </div>
         <div class="input-item">
             <span class="input-title">Remarks</span>
-            <textarea class="input-value" placeholder="Anything else you'd like to add?" @bind="_remarks"></textarea>
+            <textarea class="input-value" placeholder="Anything else you'd like to add?" @bind="Remarks"></textarea>
         </div>
     </div>
     <h5 class="subtitle" @onclick="() => ChangeCategoryState(1)">Attachments <span class="feather icon-chevron-@(GetCategoryState(1) ? "down" : "right")"></span></h5>
@@ -100,11 +105,11 @@ else
         <InfoDialog Information="IF-Tools stores passwords in hashes, and they are not recoverable."></InfoDialog>
         <div class="input-item">
             <span class="input-title">Edit Password <span class="important">*</span></span>
-            <input type="password" placeholder="Used to edit this briefing later on." @bind="_editPassword" class="input-value">
+            <input type="password" placeholder="Used to edit this briefing later on." @bind="EditPassword" class="input-value">
         </div>
         <div class="input-item">
             <span class="input-title">View Password</span>
-            <input type="password" placeholder="Used to view the briefing. Leave empty if you want this briefing to be public." @bind="_viewPassword" class="input-value">
+            <input type="password" placeholder="Used to view the briefing. Leave empty if you want this briefing to be public." @bind="ViewPassword" class="input-value">
         </div>
     </div>
 

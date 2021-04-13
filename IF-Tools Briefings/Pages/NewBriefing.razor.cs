@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using IFToolsBriefings.Data;
+using IFToolsBriefings.Data.Types;
 using IFToolsBriefings.Data.Models;
 using IFToolsBriefings.Shared.Components;
 using Microsoft.JSInterop;
@@ -9,37 +10,13 @@ namespace IFToolsBriefings.Pages
 {
     public partial class NewBriefing
     {
-        private IJSObjectReference _jsModule;
-    
-        private readonly Dictionary<int, bool> _categoryStates = new ();
-
-        private readonly DatabaseContext _databaseContext;
-
         private bool _showLoadingIndicator;
         private bool _showCompleted;
         private int _newBriefingId;
 
         private GetFlightPlanModal _fplModal;
         
-        private string _server = "Casual";
-        private string _departureAirport = "";
-        private string _arrivalAirport = "";
-        private string _departureRunway = "";
-        private string _arrivalRunway = "";
-        private int _flightLevel = 0;
-        private double _cruiseSpeed = 0;
-        private TimeSelect _departureTimeSelect;
-        private TimeSelect _timeEnrouteSelect;
-        private string _flightPlan = "";
-        private string _author = "";
-        private string _remarks = "";
-        private string _editPassword = "";
-        private string _viewPassword = "";
-
-        public NewBriefing()
-        {
-            _databaseContext = new DatabaseContext();
-        }
+        public NewBriefing() : base(new DatabaseContext()) { }
         
         protected override void OnInitialized()
         {
@@ -54,10 +31,10 @@ namespace IFToolsBriefings.Pages
             {
                 _fplModal.FplReceived += FlightPlanReceived;
 
-                _jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/newBriefing.js");
+                JsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/newBriefing.js");
             
-                await _jsModule.InvokeVoidAsync("createFilePond");
-                await _jsModule.InvokeVoidAsync("registerEvents");
+                await JsModule.InvokeVoidAsync("createFilePond");
+                await JsModule.InvokeVoidAsync("registerEvents");
 
                 await JsRuntime.InvokeVoidAsync("startTime");
             }
@@ -67,7 +44,7 @@ namespace IFToolsBriefings.Pages
         {
             if (!ValidateInputData()) return;
             
-            var filepondStatus = await _jsModule.InvokeAsync<bool>("checkIfFilepondBusy");
+            var filepondStatus = await JsModule.InvokeAsync<bool>("checkIfFilepondBusy");
             if (filepondStatus)
             {
                 CurrentPage.ShowNotification("Files are still uploading.");
@@ -79,43 +56,43 @@ namespace IFToolsBriefings.Pages
 
             var newBriefing = new Briefing
             {
-                Server = _server,
-                Origin = _departureAirport.ToUpper(),
-                Destination = _arrivalAirport.ToUpper(),
-                OriginRunway = _departureRunway.ToUpper(),
-                DestinationRunway = _arrivalRunway.ToUpper(),
-                FlightLevel = _flightLevel,
-                CruiseSpeed = _cruiseSpeed,
-                DepartureTime = _departureTimeSelect.GetDateTime(),
-                TimeEnroute = _timeEnrouteSelect.GetTimeSpan().Ticks,
-                FlightPlan = _flightPlan.ToUpper(),
-                Author = _author,
-                Remarks = _remarks,
-                EditPasswordHash = PasswordHasher.Hash(_editPassword),
-                ViewPasswordHash = string.IsNullOrEmpty(_viewPassword) ? "" : PasswordHasher.Hash(_viewPassword)
+                Server = Server,
+                Origin = DepartureAirport.ToUpper(),
+                Destination = ArrivalAirport.ToUpper(),
+                OriginRunway = DepartureRunway.ToUpper(),
+                DestinationRunway = ArrivalRunway.ToUpper(),
+                FlightLevel = FlightLevel,
+                CruiseSpeed = GetActualCruiseSpeed(CruiseSpeed),
+                DepartureTime = DepartureTimeSelect.GetDateTime(),
+                TimeEnroute = TimeEnrouteSelect.GetTimeSpan().Ticks,
+                FlightPlan = FlightPlan.ToUpper(),
+                Author = Author,
+                Remarks = Remarks,
+                EditPasswordHash = PasswordHasher.Hash(EditPassword),
+                ViewPasswordHash = string.IsNullOrEmpty(ViewPassword) ? "" : PasswordHasher.Hash(ViewPassword)
             };
             
-            var attachments = await _jsModule.InvokeAsync<string[]>("getFilepondFileIds");
+            var attachments = await JsModule.InvokeAsync<string[]>("getFilepondFileIds");
             newBriefing.AttachmentsArray = attachments;
 
-            await _databaseContext.Briefings.AddAsync(newBriefing);
-            await _databaseContext.SaveChangesAsync();
+            await DatabaseContext.Briefings.AddAsync(newBriefing);
+            await DatabaseContext.SaveChangesAsync();
             
             _showLoadingIndicator = false;
             _showCompleted = true;
             _newBriefingId = newBriefing.Id;
             
-            await _jsModule.InvokeVoidAsync("unregisterEvents");
+            await JsModule.InvokeVoidAsync("unregisterEvents");
             await InvokeAsync(StateHasChanged);
         }
 
         private bool ValidateInputData()
         {
-            if (string.IsNullOrWhiteSpace(_departureAirport) || string.IsNullOrWhiteSpace(_arrivalAirport)
-                                                             || string.IsNullOrWhiteSpace(_departureAirport)
-                                                             || string.IsNullOrWhiteSpace(_arrivalRunway)
-                                                             || string.IsNullOrWhiteSpace(_flightPlan)
-                                                             || string.IsNullOrEmpty(_editPassword))
+            if (string.IsNullOrWhiteSpace(DepartureAirport) || string.IsNullOrWhiteSpace(ArrivalAirport)
+                                                             || string.IsNullOrWhiteSpace(DepartureAirport)
+                                                             || string.IsNullOrWhiteSpace(ArrivalRunway)
+                                                             || string.IsNullOrWhiteSpace(FlightPlan)
+                                                             || string.IsNullOrEmpty(EditPassword))
             {
                 CurrentPage.ShowNotification("Check the required fields.");
                 return false;
@@ -124,44 +101,14 @@ namespace IFToolsBriefings.Pages
             return true;
         }
 
-        private void FlightPlanReceived(string fpl)
-        {
-            _flightPlan = fpl;
-            StateHasChanged();
-        }
-
-        private bool GetCategoryState(int categoryId)
-        {
-            if (!_categoryStates.ContainsKey(categoryId))
-            {
-                _categoryStates.Add(categoryId, true);
-            }
-
-            return _categoryStates[categoryId];
-        }
-
-        private void ChangeCategoryState(int categoryId)
-        {
-            if (!_categoryStates.ContainsKey(categoryId))
-            {
-                _categoryStates.Add(categoryId, false);
-            }
-            else
-            {
-                _categoryStates[categoryId] = !_categoryStates[categoryId];
-            }
-        
-            StateHasChanged();
-        }
-
         public void Dispose()
         {
-            _jsModule.InvokeVoidAsync("destroyFilePond");
-            _jsModule.InvokeVoidAsync("unregisterEvents");
+            JsModule.InvokeVoidAsync("destroyFilePond");
+            JsModule.InvokeVoidAsync("unregisterEvents");
 
             JsRuntime.InvokeVoidAsync("stopTime");
             
-            _databaseContext.Dispose();
+            DatabaseContext.Dispose();
         }
     }
 }

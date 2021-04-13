@@ -64,7 +64,7 @@ namespace IFToolsBriefings.Controllers
             }
             
             var attachment = _databaseContext.Attachments.SingleOrDefault(i => i.Guid == content);
-            if (attachment == null) return BadRequest("File does not exist.");
+            if (attachment == null) return NotFound("File does not exist.");
             
             try
             {
@@ -87,7 +87,7 @@ namespace IFToolsBriefings.Controllers
             CheckAttachmentsDirectory();
             
             var attachment = _databaseContext.Attachments.SingleOrDefault(i => i.Guid == id);
-            if (attachment == null) return BadRequest("File does not exist.");
+            if (attachment == null) return NotFound("File does not exist.");
 
             try
             {
@@ -108,11 +108,14 @@ namespace IFToolsBriefings.Controllers
         public async Task<ActionResult> Load(string id)
         {
             var attachment = await _databaseContext.Attachments.SingleOrDefaultAsync(i => i.Guid == id);
-            if (attachment == null) return BadRequest("File does not exist.");
+            if (attachment == null) return NotFound("File does not exist.");
 
             string fileName = attachment.FileName;
             string fileType = fileName.Split('.')[1];
 
+            if (!System.IO.File.Exists(Path.Combine(BaseAttachmentsPath, fileName)))
+                return BadRequest("Sorry, that file does not exist on the server.");
+            
             return File(new FileStream(Path.Combine(BaseAttachmentsPath, fileName), FileMode.Open), fileType == "png" ? "image/png" : "image/jpeg", fileName);        
         }
 
