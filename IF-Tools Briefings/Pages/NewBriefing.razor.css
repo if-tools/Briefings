@@ -51,3 +51,28 @@
 .button-item .btn {
     width: 150px;
 }
+
+.cruise-speed-input {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cruise-speed-input input {
+    width: 85%;
+}
+
+.cruise-speed-input button {
+    width: 10%;
+}
+
+@media (max-width: 960px) {
+    .cruise-speed-input input {
+        width: 70%;
+    }
+
+    .cruise-speed-input button {
+        width: 25%;
+    }
+}

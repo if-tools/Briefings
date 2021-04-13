@@ -70,7 +70,10 @@ else
         </div>
         <div class="input-item">
             <span class="input-title">Cruise Speed <span class="important">*</span></span>
-            <input type="number" step="0.01" placeholder="0.80" max="999" @bind="CruiseSpeed" @onfocusout="UpdateCruiseSpeedDisplayedAsText" class="input-value uppercase-text">
+            <div class="cruise-speed-input">
+                <input type="number" step="0.01" placeholder="0.80" max="999" @bind="CruiseSpeed" @onfocusout="UpdateCruiseSpeedDisplayedAsText" class="input-value uppercase-text">
+                <button class="cruise-speed-type-button btn btn-light" @onclick="SpeedTypeSwitchClicked">@SpeedTypeSwitchText</button>
+            </div>
             <span class="input-comment">Will be displayed as @CruiseSpeedDisplayedAs.</span>
         </div>
         <div class="input-item">

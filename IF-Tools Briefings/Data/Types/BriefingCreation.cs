@@ -33,6 +33,7 @@ namespace IFToolsBriefings.Data.Types
         protected string ViewPassword = "";
 
         protected string CruiseSpeedDisplayedAs = "M0.00";
+        protected string SpeedTypeSwitchText = "Mach";
 
         protected BriefingCreation(DatabaseContext dbContext)
         {
@@ -69,20 +70,61 @@ namespace IFToolsBriefings.Data.Types
             StateHasChanged();
         }
 
+        protected void SpeedTypeSwitchClicked()
+        {
+            switch (SpeedType)
+            {
+                case SpeedType.Mach:
+                    SpeedType = SpeedType.TrueAirspeed;
+                    SpeedTypeSwitchText = "TAS";
+                    break;
+                case SpeedType.TrueAirspeed:
+                    SpeedType = SpeedType.Mach;
+                    SpeedTypeSwitchText = "Mach";
+                    break;
+            }
+            
+            UpdateCruiseSpeedDisplayedAsText();
+        }
+
+        protected void ChangeSpeedType(SpeedType newSpeedType)
+        {
+            switch (newSpeedType)
+            {
+                case SpeedType.Mach:
+                    SpeedTypeSwitchText = "Mach";
+                    break;
+                case SpeedType.TrueAirspeed:
+                    SpeedTypeSwitchText = "TAS";
+                    break;
+            }
+            
+            UpdateCruiseSpeedDisplayedAsText();
+        }
+
         protected void UpdateCruiseSpeedDisplayedAsText()
         {
-            CruiseSpeedDisplayedAs = $"{(SpeedType == SpeedType.Mach ? "M" : "TAS")}{GetActualCruiseSpeed(CruiseSpeed):0.00}";
+            var speedToDisplay = SpeedType == SpeedType.Mach ? $"{GetActualCruiseSpeed(CruiseSpeed):0.00}" : $"{GetActualCruiseSpeed(CruiseSpeed)}";
+            
+            CruiseSpeedDisplayedAs = $"{(SpeedType == SpeedType.Mach ? "M" : "TAS ")}{speedToDisplay}";
             StateHasChanged();
         }
 
         protected double GetActualCruiseSpeed(double cruiseSpeed)
         {
-            if (SpeedType == SpeedType.TrueAirspeed) return cruiseSpeed;
+            if (SpeedType == SpeedType.TrueAirspeed)
+            {
+                // Deny values lower than 4.
+                if (cruiseSpeed < 4) return 4;
+                
+                return cruiseSpeed;
+            }
 
             // As described in https://github.com/if-tools/Briefings/issues/3
             switch (cruiseSpeed)
             {
                 case >= 400:
+                case < 0:
                     return 0;
                 case < 4:
                     return Math.Round(cruiseSpeed, 2);

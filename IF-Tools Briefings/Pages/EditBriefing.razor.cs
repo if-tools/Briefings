@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using IFToolsBriefings.Data;
 using IFToolsBriefings.Data.Models;
+using IFToolsBriefings.Data.Types;
 using IFToolsBriefings.Shared.Components;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -75,6 +76,9 @@ namespace IFToolsBriefings.Pages
             Remarks = briefing.Remarks;
             
             _briefingType = string.IsNullOrWhiteSpace(briefing.ViewPasswordHash) ? "Public" : "Private";
+
+            SpeedType = CruiseSpeed < 4 ? SpeedType.Mach : SpeedType.TrueAirspeed;
+            ChangeSpeedType(SpeedType);
             
             StateHasChanged();
         }
