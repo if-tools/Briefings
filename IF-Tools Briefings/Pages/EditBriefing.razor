@@ -14,6 +14,7 @@
 <link href="css/filepond/filepond-plugin-image-preview.min.css" rel="stylesheet">
 <link href="css/filepond/filepond.min.css" rel="stylesheet">
 <link href="css/filepond/filepond-plugin-file-poster.css" rel="stylesheet">
+<!-- End FilePond styles -->
 <style>
     @@media (min-width: 900px) {
         .filepond--item {
@@ -27,7 +28,6 @@
         }
     }
 </style>
-<!-- End FilePond styles -->
 
 <AuthenticationModal @ref="_authModal" IsShown="@(!_authenticated)" IsViewPassword="@false" ShowCloseButton="@true"></AuthenticationModal>
 <GetFlightPlanModal @ref="FplModal"></GetFlightPlanModal>
@@ -121,7 +121,7 @@
     <div class="input-item">
         <span class="input-title">
             Briefing Type
-            <HelpTooltip>Briefing type defines whether the briefing is visible in search or not.</HelpTooltip>
+            <HelpTooltip>Briefing type defines whether the briefing is visible in the search.</HelpTooltip>
         </span>
         <select @bind="_briefingType" class="input-value type-select">
             <option value="Public">Public</option>
