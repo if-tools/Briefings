@@ -159,7 +159,7 @@
     private void Authenticate(string password)
     {
         if (string.IsNullOrWhiteSpace(password)) return;
-            
+        
         if (PasswordHasher.Check(_briefing.ViewPasswordHash, password))
         {
             _authenticated = true;
