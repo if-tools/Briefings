@@ -12,11 +12,13 @@
                 <span class="modal-close feather icon-x" tabindex="0" @onkeydown="Hide" @onclick="Hide"></span>
             </div>
             <div class="modal-body">
-                <div class="input-item">
-                    <span class="input-title">Callsign</span>
-                    <input type="text" placeholder="MUFFNS" @bind="CallSign" class="input-value">
-                </div>
-                <button class="button-submit btn btn-primary" @onclick="GetFpl">Submit</button>
+                <form @onsubmit="@GetFpl">
+                    <div class="input-item">
+                        <span class="input-title">Callsign</span>
+                        <input type="text" placeholder="MUFFNS" @bind="CallSign" class="input-value">
+                    </div>
+                    <button class="button-submit btn btn-primary submit-on-enter">Submit</button>
+                </form>
             </div>
         </div>
     </div>
