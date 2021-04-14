@@ -1,0 +1,47 @@
+.help-tooltip-message {
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0.2s linear, opacity 0.2s ease;
+    line-height: 1.4;
+}
+
+.help-tooltip:hover .help-tooltip-message {
+    visibility: visible;
+    opacity: 1;
+}
+
+.help-tooltip {
+    position: relative;
+    display: inline-block;
+    margin-left: 5px;
+}
+
+.help-tooltip-icon {
+    color: black;
+    cursor: help;
+}
+
+.help-tooltip-message {
+    font-size: 15px;
+    color: black;
+    text-align: center;
+    background-color: white;
+    width: 150px;
+    padding: 10px;
+    border-radius: 10px;
+    position: absolute;
+    bottom: calc(100% + 15px);
+    box-shadow: 0 0 42px rgba(0, 0, 0, 0.1);
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.help-tooltip-message::after {
+    content: '';
+    position: absolute;
+    border: 10px solid;
+    border-color: white transparent transparent transparent;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+}

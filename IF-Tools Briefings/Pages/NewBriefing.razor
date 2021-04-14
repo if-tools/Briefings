@@ -19,6 +19,12 @@
             width: calc(50% - .5em);
         }
     }
+    
+    @@media (max-width: 640.98px) {
+        .content {
+            height: auto;
+        }
+    }
 </style>
 <!-- End FilePond styles -->
 
@@ -49,27 +55,45 @@ else
             </select>
         </div>
         <div class="input-item">
-            <span class="input-title">Departure Airport <span class="important">*</span></span>
+            <span class="input-title">
+                Departure Airport <span class="important">*</span>
+                <HelpTooltip>The <a href="https://en.wikipedia.org/wiki/ICAO_airport_code" target="_blank">ICAO code</a> of the departure airport.</HelpTooltip>
+            </span>
             <input type="text" placeholder="KLAX" @bind="DepartureAirport" maxlength="4" class="input-value uppercase-text">
         </div>
         <div class="input-item">
-            <span class="input-title">Arrival Airport <span class="important">*</span></span>
+            <span class="input-title">
+                Arrival Airport <span class="important">*</span>
+                <HelpTooltip>The <a href="https://en.wikipedia.org/wiki/ICAO_airport_code" target="_blank">ICAO code</a> of the arrival airport.</HelpTooltip>
+            </span>
             <input type="text" placeholder="KSFO" @bind="ArrivalAirport" maxlength="4" class="input-value uppercase-text">
         </div>
         <div class="input-item">
-            <span class="input-title">Departure Runway <span class="important">*</span></span>
+            <span class="input-title">
+                Departure Runway <span class="important">*</span>
+                <HelpTooltip>The number of the runway that will be used during takeoff.</HelpTooltip>
+            </span>
             <input type="text" placeholder="11L" @bind="DepartureRunway" maxlength="3" class="input-value uppercase-text">
         </div>
         <div class="input-item">
-            <span class="input-title">Arrival Runway <span class="important">*</span></span>
+            <span class="input-title">
+                Arrival Runway <span class="important">*</span>
+                <HelpTooltip>The number of the runway that will be used during the landing.</HelpTooltip>
+            </span>
             <input type="text" placeholder="26R" @bind="ArrivalRunway" maxlength="3" class="input-value uppercase-text">
         </div>
         <div class="input-item">
-            <span class="input-title">Flight Level (FL) <span class="important">*</span></span>
+            <span class="input-title">
+                Flight Level (FL) <span class="important">*</span>
+                <HelpTooltip>The height at which the flight will be operated. Expressed in hundreds of feet.</HelpTooltip>
+            </span>
             <input type="number" placeholder="350" max="999" @bind="FlightLevel" class="input-value">
         </div>
         <div class="input-item">
-            <span class="input-title">Cruise Speed <span class="important">*</span></span>
+            <span class="input-title">
+                Cruise Speed <span class="important">*</span> 
+                <HelpTooltip>The speed at which the flight will be operated. Can be expressed either in Mach or in True Airspeed.</HelpTooltip>
+            </span>
             <div class="cruise-speed-input">
                 <input type="number" step="0.01" placeholder="0.80" max="999" @bind="CruiseSpeed" @onfocusout="UpdateCruiseSpeedDisplayedAsText" class="input-value uppercase-text">
                 <button class="cruise-speed-type-button btn btn-light" @onclick="SpeedTypeSwitchClicked">@SpeedTypeSwitchText</button>
@@ -107,11 +131,17 @@ else
     <div class="category" data-visible="@GetCategoryState(2).ToString()">
         <InfoDialog Information="IF-Tools stores passwords in hashes, and they are not recoverable."></InfoDialog>
         <div class="input-item">
-            <span class="input-title">Edit Password <span class="important">*</span></span>
+            <span class="input-title">
+                Edit Password <span class="important">*</span>
+                <HelpTooltip>Edit password is used to edit briefings.</HelpTooltip>
+            </span>
             <input type="password" placeholder="Used to edit this briefing later on." @bind="EditPassword" class="input-value">
         </div>
         <div class="input-item">
-            <span class="input-title">View Password</span>
+            <span class="input-title">
+                View Password
+                <HelpTooltip>View password is used to view the briefing information. When entered, also hides the briefing from search.</HelpTooltip>
+            </span>
             <input type="password" placeholder="Used to view the briefing. Leave empty if you want this briefing to be public." @bind="ViewPassword" class="input-value">
         </div>
     </div>
