@@ -41,6 +41,10 @@ namespace IFToolsBriefings.Shared.Data.Models
         
         public string ViewPasswordHash { get; set; }
         
+        public DateTime? CreatedOn { get; set; }
+        
+        public DateTime? LastEdited { get; set; }
+        
         // These are needed due to the fact that cryptography is not supported on the Web.
         [NotMapped]
         public string EditPassword { get; set; }

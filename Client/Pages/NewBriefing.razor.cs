@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using IFToolsBriefings.Client.Services;
 using IFToolsBriefings.Client.Shared.Components;
@@ -65,7 +66,8 @@ namespace IFToolsBriefings.Client.Pages
                 Author = Author,
                 Remarks = Remarks,
                 EditPassword = EditPassword,
-                ViewPassword = ViewPassword
+                ViewPassword = ViewPassword,
+                CreatedOn = DateTime.UtcNow
             };
             
             var attachments = await JsModule.InvokeAsync<string[]>("getFilepondFileIds");

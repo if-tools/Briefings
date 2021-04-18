@@ -87,6 +87,10 @@
             }
         </div>
     </div>
+    <div class="section section-footer">
+        <span class="briefing-created-on">Created on: @(_displayBriefing.CreatedOn?.ToString("u") ?? "N/A")</span>
+        <span class="briefing-last-edited">Last edited: @(_displayBriefing.LastEdited?.ToString("u") ?? "Never")</span>
+    </div>
 </div>
 
 @code {

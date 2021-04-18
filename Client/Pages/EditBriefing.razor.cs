@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using IFToolsBriefings.Client.Services;
@@ -113,6 +114,7 @@ namespace IFToolsBriefings.Client.Pages
             _editedBriefing.FlightPlan = FlightPlan.ToUpper();
             _editedBriefing.Author = Author;
             _editedBriefing.Remarks = Remarks;
+            _editedBriefing.LastEdited = DateTime.UtcNow;
             
             _editedBriefing.AttachmentsArray = attachments;
 
