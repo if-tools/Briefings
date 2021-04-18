@@ -66,7 +66,7 @@ namespace IFToolsBriefings.Client.Services
 
         public static async Task<string> GetFlightFpl(string callSign)
         {
-            return await Http.GetFromJsonAsync<string>($"{_baseUrl}/if/IfApi/GetFlightFpl?callSign={callSign}");
+            return await Http.GetStringAsync($"{_baseUrl}/if/IfApi/GetFlightFpl?callSign={callSign}");
         }
     }
 }
