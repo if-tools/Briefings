@@ -14,7 +14,7 @@ namespace IFToolsBriefings.Server
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseUrls("http://192.168.1.108:7000");
+                    webBuilder.UseUrls("http://localhost:6000");
                     webBuilder.UseStaticWebAssets();
                     webBuilder.UseStartup<Startup>();
                 });
