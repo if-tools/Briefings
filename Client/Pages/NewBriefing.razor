@@ -1,0 +1,153 @@
+@page "/new"
+
+@using IFToolsBriefings.Client.Types
+
+@implements IDisposable
+
+@inherits BriefingCreation
+
+@inject CurrentPage CurrentPage
+@inject IJSRuntime JsRuntime
+
+<!-- FilePond styles -->
+<link href="css/filepond/filepond-plugin-image-preview.min.css" rel="stylesheet">
+<link href="css/filepond/filepond.min.css" rel="stylesheet">
+<link href="css/filepond/filepond-plugin-file-poster.css" rel="stylesheet">
+<style>
+    @@media (min-width: 900px) {
+        .filepond--item {
+            width: calc(50% - .5em);
+        }
+    }
+    
+    @@media (max-width: 640.98px) {
+        .content {
+            height: auto;
+        }
+    }
+</style>
+<!-- End FilePond styles -->
+
+<GetFlightPlanModal @ref="_fplModal"></GetFlightPlanModal>
+
+@if (_showCompleted)
+{
+    <div class="wrapper">
+        <h3 class="done-title">Done.</h3>
+        <span class="briefing-number">#@_newBriefingId</span>
+        <div class="button-wrapper">
+            <a href="/b/@_newBriefingId" class="button-item"><button class="btn btn-secondary">Open</button></a>
+            <a href="/b/@_newBriefingId/edit" class="button-item"><button class="btn btn-secondary">Edit</button></a>
+            <a href="/new" target="_blank" class="button-item"><button class="btn btn-secondary">New Briefing</button></a>
+        </div>
+    </div>
+}
+else
+{
+    <h5 class="subtitle" @onclick="() => ChangeCategoryState(0)">General Data <span class="feather icon-chevron-@(GetCategoryState(0) ? "down" : "right")"></span></h5>
+    <div class="category" data-visible="@GetCategoryState(0).ToString()">
+        <div class="input-item">
+            <span class="input-title">Server <span class="important">*</span></span>
+            <select @bind="Server" class="input-value server-select">
+                <option value="Casual">Casual Server</option>
+                <option value="Training">Training Server</option>
+                <option value="Expert">Expert Server</option>
+            </select>
+        </div>
+        <div class="input-item">
+            <span class="input-title">
+                Departure Airport <span class="important">*</span>
+                <HelpTooltip>The <a href="https://en.wikipedia.org/wiki/ICAO_airport_code" target="_blank">ICAO code</a> of the departure airport.</HelpTooltip>
+            </span>
+            <input type="text" placeholder="KLAX" @bind="DepartureAirport" maxlength="4" class="input-value uppercase-text">
+        </div>
+        <div class="input-item">
+            <span class="input-title">
+                Arrival Airport <span class="important">*</span>
+                <HelpTooltip>The <a href="https://en.wikipedia.org/wiki/ICAO_airport_code" target="_blank">ICAO code</a> of the arrival airport.</HelpTooltip>
+            </span>
+            <input type="text" placeholder="KSFO" @bind="ArrivalAirport" maxlength="4" class="input-value uppercase-text">
+        </div>
+        <div class="input-item">
+            <span class="input-title">
+                Departure Runway <span class="important">*</span>
+                <HelpTooltip>The number of the runway that will be used during takeoff.</HelpTooltip>
+            </span>
+            <input type="text" placeholder="11L" @bind="DepartureRunway" maxlength="3" class="input-value uppercase-text">
+        </div>
+        <div class="input-item">
+            <span class="input-title">
+                Arrival Runway <span class="important">*</span>
+                <HelpTooltip>The number of the runway that will be used during the landing.</HelpTooltip>
+            </span>
+            <input type="text" placeholder="26R" @bind="ArrivalRunway" maxlength="3" class="input-value uppercase-text">
+        </div>
+        <div class="input-item">
+            <span class="input-title">
+                Flight Level (FL) <span class="important">*</span>
+                <HelpTooltip>The height at which the flight will be operated. Expressed in hundreds of feet.</HelpTooltip>
+            </span>
+            <input type="number" placeholder="350" max="999" @bind="FlightLevel" class="input-value">
+        </div>
+        <div class="input-item">
+            <span class="input-title">
+                Cruise Speed <span class="important">*</span> 
+                <HelpTooltip>The speed at which the flight will be operated. Can be expressed either in Mach or in True Airspeed.</HelpTooltip>
+            </span>
+            <div class="cruise-speed-input">
+                <input type="number" step="0.01" placeholder="0.80" max="999" @bind="CruiseSpeed" @onfocusout="UpdateCruiseSpeedDisplayedAsText" class="input-value uppercase-text">
+                <button class="cruise-speed-type-button btn btn-light" @onclick="SpeedTypeSwitchClicked">@SpeedTypeSwitchText</button>
+            </div>
+            <span class="input-comment">Will be displayed as @CruiseSpeedDisplayedAs.</span>
+        </div>
+        <div class="input-item">
+            <span class="input-title">Departure Time (Zulu, today) <span class="important">*</span> <p class="current-time"></p></span>
+            <TimeSelect @ref="@DepartureTimeSelect" HoursCount="23" DepartureTimeSelect="@true"></TimeSelect>
+        </div>
+        <div class="input-item">
+            <span class="input-title">Time Enroute (ETE) <span class="important">*</span></span>
+            <TimeSelect @ref="@TimeEnrouteSelect" HoursCount="23"></TimeSelect>
+        </div>
+        <div class="input-item">
+            <span class="input-title">Flight Plan <span class="important">*</span></span>
+            <textarea class="input-value uppercase-text" placeholder="KLAX ... KSFO" @bind="FlightPlan"></textarea>
+            <button class="button-fpl-from-if btn btn-secondary" @onclick="@(() => _fplModal.Show())">Get from IF</button>
+        </div>
+        <div class="input-item">
+            <span class="input-title">Author</span>
+            <input type="text" placeholder="The author of this briefing. Leave empty if you want it to be anonymous." @bind="Author" class="input-value">
+        </div>
+        <div class="input-item">
+            <span class="input-title">Remarks</span>
+            <textarea class="input-value" placeholder="Anything else you'd like to add?" @bind="Remarks"></textarea>
+        </div>
+    </div>
+    <h5 class="subtitle" @onclick="() => ChangeCategoryState(1)">Attachments <span class="feather icon-chevron-@(GetCategoryState(1) ? "down" : "right")"></span></h5>
+    <div class="category" data-visible="@GetCategoryState(1).ToString()">
+        <InfoDialog Information="Only images are accepted. Drag to reorder."></InfoDialog>
+        <input type="file" class="filepond" name="filepond" data-max-file-size="3MB" data-max-files="10" multiple>
+    </div>
+    <h5 class="subtitle" @onclick="() => ChangeCategoryState(2)">Security <span class="feather icon-chevron-@(GetCategoryState(2) ? "down" : "right")"></span></h5>
+    <div class="category" data-visible="@GetCategoryState(2).ToString()">
+        <InfoDialog Information="IF-Tools stores passwords in hashes, and they are not recoverable."></InfoDialog>
+        <div class="input-item">
+            <span class="input-title">
+                Edit Password <span class="important">*</span>
+                <HelpTooltip>Edit password is used to edit briefings.</HelpTooltip>
+            </span>
+            <input type="password" placeholder="Used to edit this briefing later on." @bind="EditPassword" class="input-value">
+        </div>
+        <div class="input-item">
+            <span class="input-title">
+                View Password
+                <HelpTooltip>View password is used to view the briefing information. When entered, also hides the briefing from search.</HelpTooltip>
+            </span>
+            <input type="password" placeholder="Used to view the briefing. Leave empty if you want this briefing to be public." @bind="ViewPassword" class="input-value">
+        </div>
+    </div>
+
+    <div class="submit">
+        <button class="button-submit btn btn-primary" @onclick="Submit">Submit</button>
+        <LoadingIndicator IsShown="@_showLoadingIndicator" IsInline="true" AddLeftMargin="true"></LoadingIndicator>
+    </div>
+}
