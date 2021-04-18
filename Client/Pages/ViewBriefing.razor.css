@@ -1,0 +1,145 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    overflow-y: visible !important;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 50%;
+}
+
+.section:not(:last-of-type) {
+    margin-bottom: 15px;
+}
+
+.section:not(:first-of-type) {
+    margin-top: 40px;
+}
+
+.section-footer {
+    padding-bottom: 10px;
+    font-size: 15px;
+    color: gray;
+    text-align: center;
+}
+
+.logo-image {
+    height: 50px;
+}
+
+.briefing-author {
+    font-size: 17px;
+    color: gray;
+}
+
+.briefing-airports {
+    margin: 15px 0;
+}
+
+.briefing-title, .briefing-airports, .briefing-author {
+    text-align: center;
+}
+
+.briefing-title a {
+    color: black;
+    text-decoration: none;
+}
+
+.briefing-title a:hover, .briefing-title a:focus {
+    color: gray;
+    text-decoration: none;
+}
+
+.briefing-title .feather {
+    font-size: 26px;
+    margin-left: 10px;
+}
+ 
+.section-title {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.main-info {
+    width: 100%;
+}
+
+.main-info-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    height: 50px;
+    padding: 0 10px;
+    width: 100%;
+}
+
+.main-info-item:not(:last-of-type) {
+    border-bottom: 1px dashed lightgray;
+}
+
+.main-info-item * {
+    font-size: 18px;
+    letter-spacing: 1.5px;
+}
+
+.value {
+    font-weight: bold;
+}
+
+.flight-plan, .remarks {
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+.icon-clipboard {
+    margin-left: 5px;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.icon-clipboard:hover {
+    color: gray;
+}
+
+.no-attachments {
+    color: gray;
+    font-size: 18px;
+}
+
+.gallery-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.attachment-preview {
+    max-width: 100%;
+    max-height: 500px;
+    width: auto;
+    height: auto;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 42px rgba(0, 0, 0, 0.07);
+    -webkit-box-shadow: 0 0 42px rgba(0, 0, 0, 0.07);
+}
+
+@media (max-width: 1000px) {
+    .section {
+        width: 80%;
+    }
+}
+
+@media (max-width: 700px) {
+    .section {
+        width: 90%;
+    }
+}
+

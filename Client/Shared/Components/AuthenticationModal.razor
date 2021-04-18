@@ -1,0 +1,57 @@
+@using System.IO
+@using System.Net
+
+@inject CurrentPage CurrentPage
+@inject NavigationManager NavManager
+
+@if (IsShown)
+{
+    <div class="wrapper">
+        <div class="auth-modal">
+            <div class="modal-head">
+                <span class="modal-title">Authorization</span>
+                @if (ShowCloseButton)
+                {
+                    <span class="modal-close feather icon-x" tabindex="0" @onclick="Hide"></span>
+                }
+            </div>
+            <div class="modal-body">
+                <form @onsubmit="@CallAuthenticate">
+                    <div class="input-item">
+                        <span class="input-title">@(IsViewPassword ? "View" : "Edit") Password</span>
+                        <input type="password" placeholder="This briefing's @(IsViewPassword ? "view" : "edit") password." @bind="_password" class="input-value">
+                    </div>
+                    <button class="button-submit btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+
+    public Action<string> Authenticate;
+    private string _password = "";
+    
+    [Parameter]
+    public bool IsShown { get; set; }
+    
+    [Parameter]
+    public bool IsViewPassword { get; set; }
+    
+    [Parameter]
+    public bool ShowCloseButton { get; set; }
+
+    public void Hide()
+    {
+        IsShown = false;
+        
+        StateHasChanged();
+    }
+
+    private void CallAuthenticate()
+    {
+        Authenticate(_password);
+    }
+    
+}
