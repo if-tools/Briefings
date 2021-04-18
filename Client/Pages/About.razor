@@ -1,0 +1,35 @@
+@page "/about"
+
+@using IFToolsBriefings.Client.Services
+
+@inject CurrentPage CurrentPage
+
+<div class="wrapper">
+    <img class="about-logo about-element" alt="logo" src="images/logos/logo-small-wshadow.png">
+    <span class="about-title about-element">IF-Tools Briefings</span>
+    <span class="about-version about-element">@(Version ?? "N/A")</span>
+    <span class="about-description about-element">A website that allows you to create flight briefings for quick and organized flight planning.</span>
+    <span class="about-copyright about-element">Copyright &copy; 2021 Gleb Zhynko</span>
+    <span class="about-licensed about-element">Licensed under <a href="https://github.com/if-tools/Briefings/blob/master/LICENSE" target="_blank">MIT</a></span>
+</div>
+
+@code {
+
+    public string Version;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentPage.SetCurrentPageName("");
+        Version = await GetVersion();
+        
+        base.OnInitialized();
+    }
+
+    private async Task<string> GetVersion()
+    {
+        return await ApiService.GetAppVersion();
+    }
+
+    
+
+}
