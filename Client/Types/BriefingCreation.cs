@@ -8,9 +8,9 @@ namespace IFToolsBriefings.Client.Types
 {
     public abstract class BriefingCreation : ComponentBase
     {
-        protected IJSObjectReference JsModule;
+        protected IJSObjectReference GeneralJsModule;
     
-        private readonly Dictionary<int, bool> _categoryStates = new ();
+        private readonly Dictionary<int, bool> _categoryStates = new();
         
         protected GetFlightPlanModal FplModal;
 

@@ -55,7 +55,7 @@ namespace IFToolsBriefings.Shared.Data.Models
         [NotMapped]
         public string[] AttachmentsArray
         {
-            get => Attachments.Split(',');
+            get => Attachments == null ? Array.Empty<string>() : Attachments.Split(',');
             set => Attachments = string.Join(',', value);
         }
         
@@ -67,6 +67,6 @@ namespace IFToolsBriefings.Shared.Data.Models
             return TimeSpan.FromTicks(TimeEnroute);
         }
 
-        public static Briefing Default => new Briefing();
+        public static Briefing Default => new ();
     }
 }

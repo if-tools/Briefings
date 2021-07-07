@@ -103,8 +103,9 @@
     private Briefing _displayBriefing = Briefing.Default;
     private Briefing _briefing;
     private List<FileAttachment> _attachments = new();
-
-    private IJSObjectReference _jsModule;
+    
+    private IJSObjectReference _generalJsModule;
+    private IJSObjectReference _browserStorageJsModule;
 
     private AuthenticationModal _authModal;
     private bool _authenticated = true;
@@ -150,9 +151,12 @@
         {
             _authModal.Authenticate += Authenticate;
             
-            _jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/viewBriefing.js");
+            _generalJsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/viewBriefing.js");
             if(_authenticated)
-                await _jsModule.InvokeVoidAsync("initMagnificPopup");
+                await _generalJsModule.InvokeVoidAsync("initMagnificPopup");
+            
+            _browserStorageJsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/localStorage.js");
+            await _browserStorageJsModule.InvokeVoidAsync("addViewedBriefing", _actualBriefingId);
         }
     }
     
@@ -177,7 +181,7 @@
             return;
         }
             
-        await _jsModule.InvokeVoidAsync("initMagnificPopup");
+        await _generalJsModule.InvokeVoidAsync("initMagnificPopup");
     }
 
     private string GetPathForAttachment(FileAttachment attachment)

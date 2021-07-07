@@ -33,7 +33,8 @@ namespace IFToolsBriefings.Server.Controllers
 
             if (briefing.IsPrivate)
             {
-                if (string.IsNullOrEmpty(viewPassword)) return Unauthorized();
+                // let the caller know that this briefing is private
+                if (string.IsNullOrEmpty(viewPassword)) return new Briefing { Id = id, ViewPasswordHash = "notnull" };
                 if (!PasswordHasher.Check(briefing.ViewPasswordHash, viewPassword)) return Unauthorized();
             }
 

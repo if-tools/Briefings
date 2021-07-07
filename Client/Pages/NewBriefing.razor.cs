@@ -9,12 +9,14 @@ namespace IFToolsBriefings.Client.Pages
 {
     public partial class NewBriefing
     {
+        private IJSObjectReference _browserStorageJsModule;
+
         private bool _showLoadingIndicator;
         private bool _showCompleted;
         private int _newBriefingId;
 
         private GetFlightPlanModal _fplModal;
-        
+
         protected override void OnInitialized()
         {
             CurrentPage.SetCurrentPageName("New Briefing");
@@ -28,10 +30,11 @@ namespace IFToolsBriefings.Client.Pages
             {
                 _fplModal.FplReceived += FlightPlanReceived;
 
-                JsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/newBriefing.js");
+                GeneralJsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/newBriefing.js");
+                _browserStorageJsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/localStorage.js");
             
-                await JsModule.InvokeVoidAsync("createFilePond");
-                await JsModule.InvokeVoidAsync("registerEvents");
+                await GeneralJsModule.InvokeVoidAsync("createFilePond");
+                await GeneralJsModule.InvokeVoidAsync("registerEvents");
 
                 await JsRuntime.InvokeVoidAsync("startTime");
             }
@@ -41,7 +44,7 @@ namespace IFToolsBriefings.Client.Pages
         {
             if (!ValidateInputData()) return;
             
-            var filepondStatus = await JsModule.InvokeAsync<bool>("checkIfFilepondBusy");
+            var filepondStatus = await GeneralJsModule.InvokeAsync<bool>("checkIfFilepondBusy");
             if (filepondStatus)
             {
                 CurrentPage.ShowNotification("Files are still uploading.");
@@ -70,15 +73,17 @@ namespace IFToolsBriefings.Client.Pages
                 CreatedOn = DateTime.UtcNow
             };
             
-            var attachments = await JsModule.InvokeAsync<string[]>("getFilepondFileIds");
+            var attachments = await GeneralJsModule.InvokeAsync<string[]>("getFilepondFileIds");
             newBriefing.AttachmentsArray = attachments;
 
             _newBriefingId = int.Parse(await ApiService.MakeBriefing(newBriefing));
+
+            await _browserStorageJsModule.InvokeVoidAsync("addCreatedBriefing", _newBriefingId);
             
             _showLoadingIndicator = false;
             _showCompleted = true;
             
-            await JsModule.InvokeVoidAsync("unregisterEvents");
+            await GeneralJsModule.InvokeVoidAsync("unregisterEvents");
             await InvokeAsync(StateHasChanged);
         }
 
@@ -99,8 +104,8 @@ namespace IFToolsBriefings.Client.Pages
 
         public void Dispose()
         {
-            JsModule.InvokeVoidAsync("destroyFilePond");
-            JsModule.InvokeVoidAsync("unregisterEvents");
+            GeneralJsModule.InvokeVoidAsync("destroyFilePond");
+            GeneralJsModule.InvokeVoidAsync("unregisterEvents");
 
             JsRuntime.InvokeVoidAsync("stopTime");
         }

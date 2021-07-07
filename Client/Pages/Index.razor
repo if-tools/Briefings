@@ -3,7 +3,14 @@
 @inject CurrentPage CurrentPage
 @inject IJSRuntime JsRuntime
 
+@using IFToolsBriefings.Client.Services
 @implements IDisposable
+
+<style>
+    .wrapper {
+        overflow-y: visible;
+    }
+</style>
 
 <div class="wrapper">
     <h4 class="greeting">Welcome to Briefings.</h4>
@@ -22,10 +29,90 @@
             </a>
         </div>
     </div>
+    <div class="recent">
+        <div class="recent-viewed">
+            <h5 class="title">Recently Viewed <LoadingIndicator IsShown="@_showLoadingIndicators" IsInline="true" AddLeftMargin="true"></LoadingIndicator></h5>
+            @if (_recentlyViewed.Count > 0)
+            {
+                <div class="recent-items">
+                    @foreach (var recentlyViewedBriefing in _recentlyViewed)
+                    {
+                        <div class="recent-item item-viewed">
+                            <a href="/b/@recentlyViewedBriefing.Id" class="recent-item-body">
+                                <div class="id-section">
+                                    <strong>#</strong>
+                                    @recentlyViewedBriefing.Id
+                                </div>
+                                <div class="info-section">
+                                    @if (!recentlyViewedBriefing.IsPrivate)
+                                    {
+                                        <span class="info-airports">@recentlyViewedBriefing.Origin - @recentlyViewedBriefing.Destination</span>
+                                        <span class="info-bottom">
+                                            @(string.IsNullOrWhiteSpace(recentlyViewedBriefing.Author) ? "anonymous" : $"by {recentlyViewedBriefing.Author}")
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="info-private feather icon-lock"></span>
+                                    }
+                                </div>
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <span class="no-content">Your <strong>5 recently viewed</strong> briefings will be listed here.</span>
+            }
+        </div>
+        <div class="recent-created">
+            <h5 class="title">Recently Created <LoadingIndicator IsShown="@_showLoadingIndicators" IsInline="true" AddLeftMargin="true"></LoadingIndicator></h5>
+            @if (_recentlyCreated.Count > 0)
+            {
+                <div class="recent-items">
+                    @foreach (var recentlyCreatedBriefing in _recentlyCreated)
+                    {
+                        <div class="recent-item item-viewed">
+                            <a href="/b/@recentlyCreatedBriefing.Id" class="recent-item-body">
+                                <div class="id-section">
+                                    <strong>#</strong>
+                                    @recentlyCreatedBriefing.Id
+                                </div>
+                                <div class="info-section">
+                                    @if (!recentlyCreatedBriefing.IsPrivate)
+                                    {
+                                        <span class="info-airports">@recentlyCreatedBriefing.Origin - @recentlyCreatedBriefing.Destination</span>
+                                        <span class="info-bottom">
+                                            @(recentlyCreatedBriefing.CreatedOn?.ToString("u") ?? "N/A")
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="info-private feather icon-lock"></span>
+                                    }
+                                </div>
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <span class="no-content">Your <strong>5 recently created</strong> briefings will be listed here.</span>
+            }
+        </div>
+    </div>
 </div>
 
 @code {
-    
+    private IJSObjectReference _browserStorageJsModule;
+
+    private List<Briefing> _recentlyViewed = new();
+    private List<Briefing> _recentlyCreated = new();
+
+    private bool _showLoadingIndicators = true;
+
     protected override void OnInitialized()
     {
         CurrentPage.SetCurrentPageName("Main");
@@ -37,7 +124,39 @@
         if (firstRender)
         {
             await JsRuntime.InvokeVoidAsync("startTime");
+            
+            _browserStorageJsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/localStorage.js");
+            InitializeRecentBriefings();
         }
+        else
+        {
+            InitializeRecentBriefings();
+        }
+    }
+
+    private async void InitializeRecentBriefings()
+    {
+        var recentlyViewedIds = (await _browserStorageJsModule.InvokeAsync<int[]>("getViewedBriefings")).ToList();
+        var recentlyCreatedIds = (await _browserStorageJsModule.InvokeAsync<int[]>("getCreatedBriefings")).ToList();
+
+        if (recentlyViewedIds.Count > 5)
+        {
+            recentlyViewedIds = recentlyViewedIds.Where((_, i) => i < 5).ToList();
+        }
+        if (recentlyCreatedIds.Count > 5)
+        {
+            recentlyCreatedIds = recentlyCreatedIds.Where((_, i) => i < 5).ToList();
+        }
+        
+        _recentlyViewed = (await Task.WhenAll(recentlyViewedIds.ConvertAll(async id => await ApiService.GetBriefing(id)))).ToList();
+        _recentlyCreated = (await Task.WhenAll(recentlyCreatedIds.ConvertAll(async id => await ApiService.GetBriefing(id)))).ToList();
+
+        _recentlyViewed.Reverse();
+        _recentlyCreated.Reverse();
+
+        _showLoadingIndicators = false;
+        
+        await InvokeAsync(StateHasChanged);
     }
     
     public void Dispose()
