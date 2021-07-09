@@ -2,6 +2,7 @@
 @page "/b"
 
 @using IFToolsBriefings.Client.Services
+@using IFToolsBriefings.Shared.Data.Types
 @using Newtonsoft.Json
 
 @layout BriefingLayout;
@@ -69,6 +70,11 @@
             <p class="remarks">@((MarkupString)_displayBriefing.Remarks.Replace("\n", "<br>"))</p>
         </div>
     }
+    <div class="section section-weather">
+        <h4 class="section-title">Weather</h4>
+        @DepartureWeather?.RawMetar
+        @ArrivalWeather?.RawMetar
+    </div>
     <div class="section section-attachments">
         <h4 class="section-title">Attachments</h4>
         <div class="attachments-gallery">
@@ -107,6 +113,9 @@
     private IJSObjectReference _generalJsModule;
     private IJSObjectReference _browserStorageJsModule;
 
+    private ParsedMetar DepartureWeather;
+    private ParsedMetar ArrivalWeather;
+
     private AuthenticationModal _authModal;
     private bool _authenticated = true;
     
@@ -139,7 +148,9 @@
             
             _displayBriefing = _briefing;
             StateHasChanged();
+            
             AddAttachments();
+            FetchWeather();
         }
         
         base.OnInitialized();
@@ -171,9 +182,10 @@
             _authenticated = true;
             _authModal.Hide();
             _displayBriefing = _briefing;
-            AddAttachments();
-            
             StateHasChanged();
+
+            AddAttachments();
+            FetchWeather();
         }
         else
         {
@@ -182,6 +194,16 @@
         }
             
         await _generalJsModule.InvokeVoidAsync("initMagnificPopup");
+    }
+
+    private async void FetchWeather()
+    {
+        if (_briefing == null) return;
+
+        DepartureWeather = await WeatherApiService.GetMetarForStation(_briefing.Origin);
+        ArrivalWeather = await WeatherApiService.GetMetarForStation(_briefing.Destination);
+        
+        StateHasChanged();
     }
 
     private string GetPathForAttachment(FileAttachment attachment)

@@ -36,6 +36,7 @@
         CurrentPage.OnChange += StateHasChanged;
 
         ApiService.SetBaseUrl(NavManager.BaseUri);
+        WeatherApiService.SetBaseUrl(NavManager.BaseUri);
 
         base.OnInitialized();
     }

@@ -30,6 +30,7 @@ namespace IFToolsBriefings.Server.Controllers
         {
             var briefing = await _databaseContext.Briefings.SingleOrDefaultAsync(entity => entity.Id == id);
             if (briefing == null) return null;
+            
 
             if (briefing.IsPrivate)
             {

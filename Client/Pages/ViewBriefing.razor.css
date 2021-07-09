@@ -99,6 +99,10 @@
     letter-spacing: 1px;
 }
 
+.flight-plan {
+    font-family: monospace;
+}
+
 .icon-clipboard {
     margin-left: 5px;
     font-size: 22px;
