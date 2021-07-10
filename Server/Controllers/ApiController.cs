@@ -29,8 +29,7 @@ namespace IFToolsBriefings.Server.Controllers
         public async Task<ActionResult<Briefing>> GetBriefing(int id, string viewPassword = null)
         {
             var briefing = await _databaseContext.Briefings.SingleOrDefaultAsync(entity => entity.Id == id);
-            if (briefing == null) return null;
-            
+            if (briefing == null) return NotFound();
 
             if (briefing.IsPrivate)
             {
@@ -48,7 +47,7 @@ namespace IFToolsBriefings.Server.Controllers
             if (string.IsNullOrEmpty(editPassword)) return BadRequest();
             
             var briefing = await _databaseContext.Briefings.SingleOrDefaultAsync(entity => entity.Id == id);
-            if (briefing == null) return null;
+            if (briefing == null) return NotFound();
 
             if (!PasswordHasher.Check(briefing.EditPasswordHash, editPassword))
             {
