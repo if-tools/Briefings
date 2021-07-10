@@ -71,9 +71,33 @@
         </div>
     }
     <div class="section section-weather">
-        <h4 class="section-title">Weather</h4>
-        @DepartureWeather?.RawMetar
-        @ArrivalWeather?.RawMetar
+        <h4 class="section-title">Weather <span class="feather icon-refresh-ccw" @onclick="FetchWeather"></span></h4>
+        <div class="weather-block">
+            <div class="decoded-info">
+                <div class="upper-section">
+                    <span class="feather weather-icon @GetFeatherIconNameForWeatherConditions(_departureWeather.WeatherConditions)"></span>
+                    <span class="weather-temperature">@_departureWeather.Temperature °C</span>
+                </div>
+                <div class="lower-section">
+                    <span class="feather weather-wind-direction icon-arrow-up" style="transform: rotate(@(_departureWeather.WindDirection + 180)deg)"></span>
+                    <span class="weather-wind-string">@_departureWeather.WindDirection° @@ @_departureWeather.WindSpeed kts</span>
+                </div>
+            </div>
+            <div class="raw-info">@_departureWeather?.RawMetar</div>
+        </div>
+        <div class="weather-block">
+            <div class="decoded-info">
+                <div class="upper-section">
+                    <span class="feather weather-icon @GetFeatherIconNameForWeatherConditions(_arrivalWeather.WeatherConditions)"></span>
+                    <span class="weather-temperature">@_arrivalWeather.Temperature °C</span>
+                </div>
+                <div class="lower-section">
+                    <span class="feather weather-wind-direction icon-arrow-up" style="transform: rotate(@(_arrivalWeather.WindDirection + 180)deg)"></span>
+                    <span class="weather-wind-string">@_arrivalWeather.WindDirection° @@ @_arrivalWeather.WindSpeed kts</span>
+                </div>
+            </div>
+            <div class="raw-info">@_arrivalWeather?.RawMetar</div>
+        </div>
     </div>
     <div class="section section-attachments">
         <h4 class="section-title">Attachments</h4>
@@ -113,8 +137,8 @@
     private IJSObjectReference _generalJsModule;
     private IJSObjectReference _browserStorageJsModule;
 
-    private ParsedMetar DepartureWeather;
-    private ParsedMetar ArrivalWeather;
+    private ParsedMetar _departureWeather = ParsedMetar.Default;
+    private ParsedMetar _arrivalWeather = ParsedMetar.Default;
 
     private AuthenticationModal _authModal;
     private bool _authenticated = true;
@@ -200,8 +224,11 @@
     {
         if (_briefing == null) return;
 
-        DepartureWeather = await WeatherApiService.GetMetarForStation(_briefing.Origin);
-        ArrivalWeather = await WeatherApiService.GetMetarForStation(_briefing.Destination);
+        _departureWeather = ParsedMetar.Loading;
+        _arrivalWeather = ParsedMetar.Loading;
+
+        _departureWeather = await WeatherApiService.GetMetarForStation(_briefing.Origin) ?? ParsedMetar.StationNotFound;
+        _arrivalWeather = await WeatherApiService.GetMetarForStation(_briefing.Destination) ?? ParsedMetar.StationNotFound;
         
         StateHasChanged();
     }
@@ -244,6 +271,25 @@
     private string GetCruiseSpeedToDisplay(double cruiseSpeed)
     {
         return cruiseSpeed < 4 ? $"M{cruiseSpeed:0.00}" : $"TAS {cruiseSpeed}";
+    }
+
+    private string GetFeatherIconNameForWeatherConditions(WeatherConditions weatherConditions)
+    {
+        switch (weatherConditions)
+        {
+            case WeatherConditions.Clear:
+                return "icon-sun";
+            case WeatherConditions.Clouds:
+                return "icon-cloud";
+            case WeatherConditions.Rain:
+                return "icon-cloud-rain";
+            case WeatherConditions.Snow:
+                return "icon-cloud-snow";
+            case WeatherConditions.Thunderstorm:
+                return "icon-cloud-lightning";
+            default:
+                return "icon-sun";
+        }
     }
 
 }

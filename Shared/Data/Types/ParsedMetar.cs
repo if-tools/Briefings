@@ -12,5 +12,10 @@ namespace IFToolsBriefings.Shared.Data.Types
         public int WindGusts { get; set; }
         public int Temperature { get; set; }
         public DateTime ReportTime { get; set; }
+
+        public static ParsedMetar Default => new ();
+        public static ParsedMetar Loading => new () { RawMetar = "Loading..."};
+        public static ParsedMetar StationNotFound => new () { RawMetar = "No such weather station found."};
+
     }
 }

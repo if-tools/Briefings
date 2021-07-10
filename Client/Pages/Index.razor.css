@@ -103,6 +103,7 @@
 
 .recent-item-body {
     display: flex;
+    flex-direction: row;
     border-radius: 6px;
     width: 100%;
     height: 100%;

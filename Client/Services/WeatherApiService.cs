@@ -1,8 +1,7 @@
-using System;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
 using IFToolsBriefings.Shared.Data.Types;
+using Newtonsoft.Json;
 
 namespace IFToolsBriefings.Client.Services
 {
@@ -19,8 +18,10 @@ namespace IFToolsBriefings.Client.Services
         
         public static async Task<ParsedMetar> GetMetarForStation(string weatherStationId)
         {
-            Console.WriteLine($"{_baseUrl}/GetMetarForStation?weatherStationId={weatherStationId}");
-            return await Http.GetFromJsonAsync<ParsedMetar>($"{_baseUrl}/GetMetarForStation?weatherStationId={weatherStationId}");
+            var resultString = await Http.GetStringAsync($"{_baseUrl}/GetMetarForStation?weatherStationId={weatherStationId}");
+
+            if (resultString == "null") return null;
+            return JsonConvert.DeserializeObject<ParsedMetar>(resultString);
         }
     }
 }

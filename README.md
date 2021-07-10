@@ -9,7 +9,7 @@ These are the current features:
 - Edit your already created briefings. Add any additional info after creating a briefing in case you've missed it during creation, or edit the main info to keep the briefing up-to-date.
 - Search created briefings. Find your next destination by searching briefings created by other users.
 - Make your briefings private and hide them from search, or keep them public for other users to see.
-- View your last viewed and created briefings on the main page. 
+- See your last viewed and created briefings on the main page. 
 
 You are welcome to request new features! To do so, [open a new issue](https://github.com/if-tools/Briefings/issues/new?assignees=&labels=enhancement&template=feature_request.md).
 

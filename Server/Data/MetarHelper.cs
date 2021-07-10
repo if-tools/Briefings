@@ -24,7 +24,7 @@ namespace IFToolsBriefings.Server.Data
             var weatherConditions = WeatherConditions.Clear;
 
             // clouds (any)
-            if (!cloudLayers.IsCLR)
+            if (cloudLayers.Count > 0)
             {
                 weatherConditions = WeatherConditions.Clouds;
             }
@@ -49,7 +49,8 @@ namespace IFToolsBriefings.Server.Data
 
             parsedMetar.WeatherConditions = weatherConditions;
             parsedMetar.WindDirection = decodedMetar.Wind.Direction ?? 0;
-            parsedMetar.WindSpeed = decodedMetar.Wind.Speed;
+            // convert to kts if needed
+            parsedMetar.WindSpeed = decodedMetar.Wind.Unit == SpeedUnit.mps ? (int)Math.Ceiling(decodedMetar.Wind.Speed / 0.514f) : decodedMetar.Wind.Speed;
             parsedMetar.WindGusts = decodedMetar.Wind.GustSpeed ?? 0;
 
             return parsedMetar;
