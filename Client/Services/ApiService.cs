@@ -24,12 +24,27 @@ namespace IFToolsBriefings.Client.Services
         
         public static async Task<Briefing> GetBriefing(int id, string viewPassword = null)
         {
-            return await Http.GetFromJsonAsync<Briefing>($"{_baseUrl}/GetBriefing?id={id}&viewPassword={viewPassword}");
+            try
+            {
+                return await Http.GetFromJsonAsync<Briefing>(
+                    $"{_baseUrl}/GetBriefing?id={id}&viewPassword={viewPassword}");
+            }
+            catch
+            {
+                return null;
+            }
         }
         
         public static async Task<Briefing> GetBriefingToEdit(int id, string editPassword)
         {
-            return await Http.GetFromJsonAsync<Briefing>($"{_baseUrl}/GetBriefingToEdit?id={id}&editPassword={editPassword}");
+            try
+            {
+                return await Http.GetFromJsonAsync<Briefing>($"{_baseUrl}/GetBriefingToEdit?id={id}&editPassword={editPassword}");
+            }
+            catch
+            {
+                return null;
+            }
         }
         
         public static async Task<Briefing[]> GetBriefings(BriefingSearchMethod searchMethod, string query)

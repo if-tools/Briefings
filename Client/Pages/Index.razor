@@ -2,6 +2,7 @@
 
 @inject CurrentPage CurrentPage
 @inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
 
 @using IFToolsBriefings.Client.Services
 @implements IDisposable
@@ -37,6 +38,8 @@
                 <div class="recent-items">
                     @foreach (var recentlyViewedBriefing in _recentlyViewed)
                     {
+                        if (recentlyViewedBriefing == null) continue;
+                        
                         <div class="recent-item item-viewed">
                             <a href="/b/@recentlyViewedBriefing.Id" class="recent-item-body">
                                 <div class="id-section">
@@ -73,6 +76,8 @@
                 <div class="recent-items">
                     @foreach (var recentlyCreatedBriefing in _recentlyCreated)
                     {
+                        if (recentlyCreatedBriefing == null) continue;
+
                         <div class="recent-item item-viewed">
                             <a href="/b/@recentlyCreatedBriefing.Id" class="recent-item-body">
                                 <div class="id-section">
@@ -116,6 +121,7 @@
     protected override void OnInitialized()
     {
         CurrentPage.SetCurrentPageName("Main");
+        
         base.OnInitialized();
     }
     
@@ -126,10 +132,6 @@
             await JsRuntime.InvokeVoidAsync("startTime");
             
             _browserStorageJsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/localStorage.js");
-            InitializeRecentBriefings();
-        }
-        else
-        {
             InitializeRecentBriefings();
         }
     }
