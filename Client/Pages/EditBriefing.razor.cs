@@ -57,7 +57,7 @@ namespace IFToolsBriefings.Client.Pages
                 _authModal.Authenticate += Authenticate;
                 FplModal.FplReceived += FlightPlanReceived;
 
-                JsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/editBriefing.js");
+                GeneralJsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/editBriefing.js");
             }
         }
 
@@ -89,7 +89,7 @@ namespace IFToolsBriefings.Client.Pages
             if (!_authenticated) return;
             if (!ValidateInputData()) return;
             
-            var filepondStatus = await JsModule.InvokeAsync<bool>("checkIfFilepondBusy");
+            var filepondStatus = await GeneralJsModule.InvokeAsync<bool>("checkIfFilepondBusy");
             if (filepondStatus)
             {
                 CurrentPage.ShowNotification("Files are still uploading.");
@@ -99,7 +99,7 @@ namespace IFToolsBriefings.Client.Pages
             _showLoadingIndicator = true;
             await InvokeAsync(StateHasChanged);
 
-            var attachments = await JsModule.InvokeAsync<string[]>("getFilepondFileIds");
+            var attachments = await GeneralJsModule.InvokeAsync<string[]>("getFilepondFileIds");
             
             // Edit the original briefing entity
             _editedBriefing.Server = Server;
@@ -147,8 +147,8 @@ namespace IFToolsBriefings.Client.Pages
                 return;
             }
             
-            await JsModule.InvokeVoidAsync("registerEvents");
-            await JsModule.InvokeVoidAsync("createFilePond", JsonConvert.SerializeObject(_editedBriefing.AttachmentsArray.ToArray<object>()));
+            await GeneralJsModule.InvokeVoidAsync("registerEvents");
+            await GeneralJsModule.InvokeVoidAsync("createFilePond", JsonConvert.SerializeObject(_editedBriefing.AttachmentsArray.ToArray<object>()));
             await JsRuntime.InvokeVoidAsync("startTime");
         }
 
@@ -168,8 +168,8 @@ namespace IFToolsBriefings.Client.Pages
 
         public void Dispose()
         {
-            JsModule.InvokeVoidAsync("destroyFilePond");
-            JsModule.InvokeVoidAsync("unregisterEvents");
+            GeneralJsModule.InvokeVoidAsync("destroyFilePond");
+            GeneralJsModule.InvokeVoidAsync("unregisterEvents");
 
             JsRuntime.InvokeVoidAsync("stopTime");
         }

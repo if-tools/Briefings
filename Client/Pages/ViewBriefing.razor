@@ -2,6 +2,7 @@
 @page "/b"
 
 @using IFToolsBriefings.Client.Services
+@using IFToolsBriefings.Shared.Data.Types
 @using Newtonsoft.Json
 
 @layout BriefingLayout;
@@ -69,6 +70,35 @@
             <p class="remarks">@((MarkupString)_displayBriefing.Remarks.Replace("\n", "<br>"))</p>
         </div>
     }
+    <div class="section section-weather">
+        <h4 class="section-title">Weather <span class="feather icon-refresh-ccw" @onclick="FetchWeather"></span></h4>
+        <div class="weather-block">
+            <div class="decoded-info">
+                <div class="upper-section">
+                    <span class="feather weather-icon @GetFeatherIconNameForWeatherConditions(_departureWeather.WeatherConditions)"></span>
+                    <span class="weather-temperature">@_departureWeather.Temperature °C</span>
+                </div>
+                <div class="lower-section">
+                    <span class="feather weather-wind-direction icon-arrow-up" style="transform: rotate(@(_departureWeather.WindDirection + 180)deg)"></span>
+                    <span class="weather-wind-string">@_departureWeather.WindDirection° @@ @_departureWeather.WindSpeed kts</span>
+                </div>
+            </div>
+            <div class="raw-info">@_departureWeather?.RawMetar</div>
+        </div>
+        <div class="weather-block">
+            <div class="decoded-info">
+                <div class="upper-section">
+                    <span class="feather weather-icon @GetFeatherIconNameForWeatherConditions(_arrivalWeather.WeatherConditions)"></span>
+                    <span class="weather-temperature">@_arrivalWeather.Temperature °C</span>
+                </div>
+                <div class="lower-section">
+                    <span class="feather weather-wind-direction icon-arrow-up" style="transform: rotate(@(_arrivalWeather.WindDirection + 180)deg)"></span>
+                    <span class="weather-wind-string">@_arrivalWeather.WindDirection° @@ @_arrivalWeather.WindSpeed kts</span>
+                </div>
+            </div>
+            <div class="raw-info">@_arrivalWeather?.RawMetar</div>
+        </div>
+    </div>
     <div class="section section-attachments">
         <h4 class="section-title">Attachments</h4>
         <div class="attachments-gallery">
@@ -103,8 +133,12 @@
     private Briefing _displayBriefing = Briefing.Default;
     private Briefing _briefing;
     private List<FileAttachment> _attachments = new();
+    
+    private IJSObjectReference _generalJsModule;
+    private IJSObjectReference _browserStorageJsModule;
 
-    private IJSObjectReference _jsModule;
+    private ParsedMetar _departureWeather = ParsedMetar.Default;
+    private ParsedMetar _arrivalWeather = ParsedMetar.Default;
 
     private AuthenticationModal _authModal;
     private bool _authenticated = true;
@@ -138,7 +172,9 @@
             
             _displayBriefing = _briefing;
             StateHasChanged();
+            
             AddAttachments();
+            FetchWeather();
         }
         
         base.OnInitialized();
@@ -150,9 +186,12 @@
         {
             _authModal.Authenticate += Authenticate;
             
-            _jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/viewBriefing.js");
+            _generalJsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/viewBriefing.js");
             if(_authenticated)
-                await _jsModule.InvokeVoidAsync("initMagnificPopup");
+                await _generalJsModule.InvokeVoidAsync("initMagnificPopup");
+            
+            _browserStorageJsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/localStorage.js");
+            await _browserStorageJsModule.InvokeVoidAsync("addViewedBriefing", _actualBriefingId);
         }
     }
     
@@ -167,9 +206,10 @@
             _authenticated = true;
             _authModal.Hide();
             _displayBriefing = _briefing;
-            AddAttachments();
-            
             StateHasChanged();
+
+            AddAttachments();
+            FetchWeather();
         }
         else
         {
@@ -177,7 +217,20 @@
             return;
         }
             
-        await _jsModule.InvokeVoidAsync("initMagnificPopup");
+        await _generalJsModule.InvokeVoidAsync("initMagnificPopup");
+    }
+
+    private async void FetchWeather()
+    {
+        if (_briefing == null) return;
+
+        _departureWeather = ParsedMetar.Loading;
+        _arrivalWeather = ParsedMetar.Loading;
+
+        _departureWeather = await WeatherApiService.GetMetarForStation(_briefing.Origin) ?? ParsedMetar.StationNotFound;
+        _arrivalWeather = await WeatherApiService.GetMetarForStation(_briefing.Destination) ?? ParsedMetar.StationNotFound;
+        
+        StateHasChanged();
     }
 
     private string GetPathForAttachment(FileAttachment attachment)
@@ -218,6 +271,25 @@
     private string GetCruiseSpeedToDisplay(double cruiseSpeed)
     {
         return cruiseSpeed < 4 ? $"M{cruiseSpeed:0.00}" : $"TAS {cruiseSpeed}";
+    }
+
+    private string GetFeatherIconNameForWeatherConditions(WeatherConditions weatherConditions)
+    {
+        switch (weatherConditions)
+        {
+            case WeatherConditions.Clear:
+                return "icon-sun";
+            case WeatherConditions.Clouds:
+                return "icon-cloud";
+            case WeatherConditions.Rain:
+                return "icon-cloud-rain";
+            case WeatherConditions.Snow:
+                return "icon-cloud-snow";
+            case WeatherConditions.Thunderstorm:
+                return "icon-cloud-lightning";
+            default:
+                return "icon-sun";
+        }
     }
 
 }
