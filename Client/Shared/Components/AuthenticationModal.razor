@@ -19,7 +19,7 @@
                 <form @onsubmit="@CallAuthenticate">
                     <div class="input-item">
                         <span class="input-title">@(IsViewPassword ? "View" : "Edit") Password</span>
-                        <input type="password" placeholder="This briefing's @(IsViewPassword ? "view" : "edit") password." @bind="_password" class="input-value">
+                        <input @ref=_passwordInput type="password" placeholder="Enter the briefing password here." @bind="_password" class="input-value" autofocus>
                     </div>
                     <button class="button-submit btn btn-primary">Submit</button>
                 </form>
@@ -31,6 +31,7 @@
 @code {
 
     public Action<string> Authenticate;
+    private ElementReference _passwordInput;
     private string _password = "";
     
     [Parameter]
@@ -41,7 +42,19 @@
     
     [Parameter]
     public bool ShowCloseButton { get; set; }
-
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            await _passwordInput.FocusAsync();
+        }
+        catch
+        {
+            // ignored
+        }
+    }
+    
     public void Hide()
     {
         IsShown = false;

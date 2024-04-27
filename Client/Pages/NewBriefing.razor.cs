@@ -13,7 +13,7 @@ namespace IFToolsBriefings.Client.Pages
 
         private bool _showLoadingIndicator;
         private bool _showCompleted;
-        private int _newBriefingId;
+        private string _newBriefingId;
 
         private GetFlightPlanModal _fplModal;
 
@@ -76,7 +76,7 @@ namespace IFToolsBriefings.Client.Pages
             var attachments = await GeneralJsModule.InvokeAsync<string[]>("getFilepondFileIds");
             newBriefing.AttachmentsArray = attachments;
 
-            _newBriefingId = int.Parse(await ApiService.MakeBriefing(newBriefing));
+            _newBriefingId = await ApiService.MakeBriefing(newBriefing);
 
             await _browserStorageJsModule.InvokeVoidAsync("addCreatedBriefing", _newBriefingId);
             
@@ -95,7 +95,7 @@ namespace IFToolsBriefings.Client.Pages
                                                              || string.IsNullOrWhiteSpace(FlightPlan)
                                                              || string.IsNullOrEmpty(EditPassword))
             {
-                CurrentPage.ShowNotification("Check the required fields.");
+                CurrentPage.ShowNotification("Please make sure all required fields are complete.");
                 return false;
             }
 

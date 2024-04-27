@@ -9,6 +9,7 @@ FilePond.registerPlugin(
 FilePond.setOptions({
     allowReorder: true,
     acceptedFileTypes: ['image/png', 'image/jpeg'],
+    maxParallelUploads: 1,
     server: {
         url: "/api/Attachment/",
         process:(fieldName, file, metadata, load, error, progress, abort) => {
@@ -41,7 +42,14 @@ FilePond.setOptions({
         },
         fetch: null,
         revert: "Revert",
-        remove: "Remove",
-        load: "Load?id="
+        remove: null,
+        load: (source, load, error, progress, abort, headers) => {
+            const myRequest = new Request(source);
+            fetch(myRequest).then(function(response) {
+                response.blob().then(function(myBlob) {
+                    load(myBlob)
+                });
+            });
+        }
     }
 });

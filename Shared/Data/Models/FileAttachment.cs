@@ -1,16 +1,18 @@
 using System;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MongoDB.Bson;
 
 namespace IFToolsBriefings.Shared.Data.Models
 {
     [Table("Attachments")]
     public class FileAttachment
     {
-        [Key]
-        public int Id { get; set; }
+        public ObjectId Id { get; set; }
         
         public string FileName { get; set; }
+        
+        [NotMapped]
+        public string FileUrl { get; set; }
         
         public long FileSize { get; set; }
         

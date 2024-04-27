@@ -16,7 +16,6 @@ namespace IFToolsBriefings.Client.Pages
         [Parameter]
         public string BriefingId { get; set; }
 
-        private int _actualBriefingId;
         private bool _showLoadingIndicator;
         
         private bool _authenticated;
@@ -30,7 +29,7 @@ namespace IFToolsBriefings.Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            if (string.IsNullOrEmpty(BriefingId) || !int.TryParse(BriefingId, out _actualBriefingId))
+            if (string.IsNullOrEmpty(BriefingId))
             {
                 NavManager.NavigateTo("/");
             
@@ -39,7 +38,7 @@ namespace IFToolsBriefings.Client.Pages
             
             CurrentPage.SetCurrentPageName("Edit Briefing");
             
-            var briefingExists = await ApiService.CheckIfBriefingExists(_actualBriefingId);
+            var briefingExists = await ApiService.CheckIfBriefingExists(BriefingId);
             if (!briefingExists)
             {
                 NavManager.NavigateTo("/");
@@ -120,7 +119,7 @@ namespace IFToolsBriefings.Client.Pages
 
             _editedBriefing.ViewPassword = _briefingType == "Public" ? "none" : ViewPassword;
 
-            await ApiService.EditBriefing(_actualBriefingId, _editedBriefing, _editPassword);
+            await ApiService.EditBriefing(BriefingId, _editedBriefing, _editPassword);
             
             // Done editing, return to the briefing page.
             NavManager.NavigateTo($"/b/{BriefingId}");
@@ -130,9 +129,9 @@ namespace IFToolsBriefings.Client.Pages
         {
             if (string.IsNullOrWhiteSpace(password)) return;
             
-            if (await ApiService.CheckPassword(_actualBriefingId, password))
+            if (await ApiService.CheckPassword(BriefingId, password))
             {
-                _editedBriefing = await ApiService.GetBriefingToEdit(_actualBriefingId, password);
+                _editedBriefing = await ApiService.GetBriefingToEdit(BriefingId, password);
                 _editPassword = password;
                 
                 _authenticated = true;
@@ -146,9 +145,12 @@ namespace IFToolsBriefings.Client.Pages
                 CurrentPage.ShowNotification("Wrong password.");
                 return;
             }
+
+            var attachments = (await ApiService.GetAttachments(JsonConvert.SerializeObject(_editedBriefing.AttachmentsArray)))
+                .ToList().ConvertAll(a => a.FileUrl);
             
             await GeneralJsModule.InvokeVoidAsync("registerEvents");
-            await GeneralJsModule.InvokeVoidAsync("createFilePond", JsonConvert.SerializeObject(_editedBriefing.AttachmentsArray.ToArray<object>()));
+            await GeneralJsModule.InvokeVoidAsync("createFilePond", JsonConvert.SerializeObject(attachments.ToArray<object>()));
             await JsRuntime.InvokeVoidAsync("startTime");
         }
 

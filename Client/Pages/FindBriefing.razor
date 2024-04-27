@@ -40,7 +40,7 @@
                     <tbody>
                     @foreach (var briefing in _briefings)
                     {
-                        <tr class="clickable" @onclick="() => NavigateToBriefing(briefing.Id)">
+                        <tr class="clickable" @onclick="() => NavigateToBriefing(briefing.StringId)">
                             <td>@($"{briefing.Origin} - {briefing.Destination}")</td>
                             <td>@(briefing.Author.Trim().Length == 0 ? "Anonymous" : briefing.Author)</td>
                         </tr>
@@ -119,7 +119,7 @@
         StateHasChanged();
     }
 
-    private void NavigateToBriefing(int id)
+    private void NavigateToBriefing(string id)
     {
         NavManager.NavigateTo($"/b/{id}");
     }

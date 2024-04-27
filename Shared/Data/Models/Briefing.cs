@@ -1,14 +1,17 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MongoDB.Bson;
 
 namespace IFToolsBriefings.Shared.Data.Models
 {
     [Table("Briefings")]
     public class Briefing
     {
-        [Key]
-        public int Id { get; set; }
+        public ObjectId Id { get; set; }
+        
+        // this is stored separately because ObjectId.ToString() returns zeroes on WASM
+        public string StringId { get; set; }
         
         public string Server { get; set; }
 
@@ -61,7 +64,7 @@ namespace IFToolsBriefings.Shared.Data.Models
         
         [NotMapped]
         public bool IsPrivate => !string.IsNullOrWhiteSpace(ViewPasswordHash);
-
+        
         public TimeSpan GetTimeEnroute()
         {
             return TimeSpan.FromTicks(TimeEnroute);
