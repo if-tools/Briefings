@@ -62,7 +62,7 @@ namespace IFToolsBriefings.Server.Controllers
         }
         
         [HttpGet("[action]")]
-        public async Task<ActionResult<Briefing[]>> GetBriefings(BriefingSearchMethod searchMethod, string query)
+        public ActionResult<Briefing[]> GetBriefings(BriefingSearchMethod searchMethod, string query)
         {
             var briefings = databaseContext.Briefings.Where(entry => entry.ViewPasswordHash.Trim().Length == 0);
 

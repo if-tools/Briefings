@@ -15,7 +15,7 @@ namespace IFToolsBriefings.Server.Data
             $"mongodb://{Environment.GetEnvironmentVariable("MONGO_DB_USERNAME")}:{Environment.GetEnvironmentVariable("MONGO_DB_PASSWORD")}@{Environment.GetEnvironmentVariable("MONGO_DB_URL")}:{Environment.GetEnvironmentVariable("MONGO_DB_PORT")}";
 
         private static readonly string ConnectionString =
-            Environment.GetEnvironmentVariable("MONGO_DB_CONN_STRING") ?? LocalConnectionString;
+            Environment.GetEnvironmentVariable("MONGO_DB_CONN_STRING")?.Replace("\"", "") ?? LocalConnectionString;
         
         private static readonly IMongoClient Client = new MongoClient(ConnectionString);
         private static readonly IMongoDatabase _database = Client.GetDatabase(Environment.GetEnvironmentVariable("MONGO_DB_DATABASE"));
