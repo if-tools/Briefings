@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using IFToolsBriefings.Client.Shared.Components;
+using IFToolsBriefings.Client.Components.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 

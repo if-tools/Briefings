@@ -2,7 +2,7 @@ using System;
 using System.Net.Http;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using IFToolsBriefings.Client;
+using IFToolsBriefings.Client.Components;
 using IFToolsBriefings.Client.Shared;
 using Microsoft.Extensions.DependencyInjection;
 
