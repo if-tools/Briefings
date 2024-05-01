@@ -45,7 +45,7 @@ If you want to use MongoDB Atlas, you only need to specify your connection strin
    ```
    MongoDB will now be running at `localhost:27017`, user: `admin`, password: `admin`, database: `briefings`.
 
-**Note**: For the Get Flight Plan from IF feature to work, you must have [IF-Tools](https://github.com/if-tools/IF-Tools) running on `http://localhost:5001`.
+**Note**: For the Get Flight Plan from IF feature to work, you must have [IF-Tools](https://github.com/if-tools/IF-Tools) running on the address specified by the `IF_TOOLS_ADDRESS` env var (default: `http://localhost:5001`).
 
 ## Contributing
 Fork the `develop` branch of this repo to get started, follow the above instructions to build the app, and then open a new Pull Request when you've made your desired changes (don't forget to describe them). Thanks for your help!
