@@ -3,10 +3,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using ENG.WMOCodes.Codes;
-using ENG.WMOCodes.Decoders;
 using IFToolsBriefings.Server.Data;
 using IFToolsBriefings.Shared.Data.Types;
+using Metar.Decoder;
+using Metar.Decoder.Entity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IFToolsBriefings.Server.Controllers
@@ -18,13 +18,13 @@ namespace IFToolsBriefings.Server.Controllers
     [ApiController]
     public class WeatherApiController : Controller
     {
-        private const string BaseUrl = "https://www.aviationweather.gov/adds/dataserver_current/httpparam?dataSource=metars&requestType=retrieve&format=xml&hoursBeforeNow=3&mostRecent=true&stationString=";
+        private const string BaseUrl = "https://aviationweather.gov/api/data/metar?ids={0}";
         private static readonly HttpClient Http = new ();
 
         [HttpGet("[action]")]
         public async Task<ActionResult<ParsedMetar>> GetMetarForStation(string weatherStationId)
         {
-            var httpResponse = await Http.GetAsync(BaseUrl + weatherStationId);
+            var httpResponse = await Http.GetAsync(string.Format(BaseUrl, weatherStationId));
             if(!httpResponse.IsSuccessStatusCode)
             {
                 return null;
@@ -32,20 +32,15 @@ namespace IFToolsBriefings.Server.Controllers
             
             var rawText = await httpResponse.Content.ReadAsStringAsync();
             if (string.IsNullOrWhiteSpace(rawText)) return null;
-
-            var xml = XDocument.Parse(rawText);
-
-            var xMetar = xml.Root?.Descendants("data").Descendants("METAR").FirstOrDefault();
-            if (xMetar == null) return null;
             
-            var rawMetar = "METAR " + xMetar.Element("raw_text")?.Value;
+            var rawMetar = rawText.Replace("\n", "");
 
-            Metar decodedMetar = null;
+            DecodedMetar decodedMetar = null;
             var valid = true;
 
             try
             {
-                decodedMetar = new MetarDecoder().Decode(rawMetar);
+                decodedMetar = new MetarDecoder().Parse(rawMetar);
             }
             catch
             {

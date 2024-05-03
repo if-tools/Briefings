@@ -1,25 +1,23 @@
 using System;
-using ENG.WMOCodes.Codes;
-using ENG.WMOCodes.Types;
 using IFToolsBriefings.Shared.Data.Types;
+using Metar.Decoder.Entity;
 
 namespace IFToolsBriefings.Server.Data
 {
     public class MetarHelper
     {
-        public static ParsedMetar ConstructParsedMetar(Metar decodedMetar)
+        public static ParsedMetar ConstructParsedMetar(DecodedMetar decodedMetar)
         {
             if (decodedMetar == null) return new ParsedMetar {IsValid = false};
             
             var parsedMetar = new ParsedMetar();
 
             parsedMetar.IsValid = true;
-            parsedMetar.RawMetar = decodedMetar.ToCode();
-            parsedMetar.ReportTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, decodedMetar.Date.Day,
-                decodedMetar.Date.Hour, decodedMetar.Date.Minute, 0);
-            parsedMetar.Temperature = decodedMetar.Temperature;
+            parsedMetar.RawMetar = decodedMetar.RawMetar;
+            parsedMetar.ReportTime = new DateTime();
+            parsedMetar.Temperature = (int)decodedMetar.AirTemperature.ActualValue;
 
-            var decodedPhenomena = decodedMetar.Phenomena;
+            var decodedPhenomena = decodedMetar.PresentWeather;
             var cloudLayers = decodedMetar.Clouds;
             var weatherConditions = WeatherConditions.Clear;
 
@@ -29,8 +27,9 @@ namespace IFToolsBriefings.Server.Data
                 weatherConditions = WeatherConditions.Clouds;
             }
             
+            /*
             // rain / showers
-            if (decodedPhenomena.Contains(Phenomenon.RA) || decodedPhenomena.Contains(Phenomenon.SH))
+            if (decodedPhenomena.Contains(new WeatherPhenomenon || decodedPhenomena.Contains(Phenomenon.SH))
             {
                 weatherConditions = WeatherConditions.Rain;
             }
@@ -45,13 +44,11 @@ namespace IFToolsBriefings.Server.Data
             if (decodedPhenomena.Contains(Phenomenon.TS))
             {
                 weatherConditions = WeatherConditions.Thunderstorm;
-            }
+            }*/
 
             parsedMetar.WeatherConditions = weatherConditions;
-            parsedMetar.WindDirection = decodedMetar.Wind.Direction ?? 0;
-            // convert to kts if needed
-            parsedMetar.WindSpeed = decodedMetar.Wind.Unit == SpeedUnit.mps ? (int)Math.Ceiling(decodedMetar.Wind.Speed / 0.514f) : decodedMetar.Wind.Speed;
-            parsedMetar.WindGusts = decodedMetar.Wind.GustSpeed ?? 0;
+            parsedMetar.WindDirection = (int)decodedMetar.SurfaceWind.MeanDirection.ActualValue;
+            parsedMetar.WindSpeed = (int)decodedMetar.SurfaceWind.MeanSpeed.ActualValue;
 
             return parsedMetar;
         }

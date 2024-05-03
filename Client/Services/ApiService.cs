@@ -17,12 +17,12 @@ namespace IFToolsBriefings.Client.Services
             _baseUrl = baseUrl + "api";
         }
         
-        public static async Task<bool> CheckIfBriefingExists(int id)
+        public static async Task<bool> CheckIfBriefingExists(string id)
         {
             return await Http.GetFromJsonAsync<bool>($"{_baseUrl}/CheckIfBriefingExists?id={id}");
         }
         
-        public static async Task<Briefing> GetBriefing(int id, string viewPassword = null)
+        public static async Task<Briefing> GetBriefing(string id, string viewPassword = null)
         {
             try
             {
@@ -35,7 +35,7 @@ namespace IFToolsBriefings.Client.Services
             }
         }
         
-        public static async Task<Briefing> GetBriefingToEdit(int id, string editPassword)
+        public static async Task<Briefing> GetBriefingToEdit(string id, string editPassword)
         {
             try
             {
@@ -59,12 +59,12 @@ namespace IFToolsBriefings.Client.Services
             return await response.Content.ReadAsStringAsync();
         }
         
-        public static async Task EditBriefing(int id, Briefing editedBriefing, string editPassword)
+        public static async Task EditBriefing(string id, Briefing editedBriefing, string editPassword)
         {
             await Http.PostAsJsonAsync($"{_baseUrl}/EditBriefing", new EditBriefingPostParameters(id, editedBriefing, editPassword));
         }
         
-        public static async Task<bool> CheckPassword(int id, string editPassword = null, string viewPassword = null)
+        public static async Task<bool> CheckPassword(string id, string editPassword = null, string viewPassword = null)
         {
             return await Http.GetFromJsonAsync<bool>($"{_baseUrl}/CheckPassword?id={id}&editPassword={editPassword}&viewPassword={viewPassword}");
         }

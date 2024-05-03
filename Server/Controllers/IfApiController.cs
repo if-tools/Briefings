@@ -1,3 +1,4 @@
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +14,7 @@ namespace IFToolsBriefings.Server.Controllers
         {
             using var http = new HttpClient();
             
-            return await http.GetStringAsync($"http://localhost:5000/api/IfApi/GetFlightFpl?callSign={callSign}");
+            return await http.GetStringAsync($"http://{Environment.GetEnvironmentVariable("IF_TOOLS_ADDRESS")}/api/IfApi/GetFlightFpl?callSign={callSign}");
         }
     }
 }

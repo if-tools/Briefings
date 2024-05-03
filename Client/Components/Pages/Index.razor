@@ -5,6 +5,7 @@
 @inject NavigationManager NavigationManager
 
 @using IFToolsBriefings.Client.Services
+@using IFToolsBriefings.Shared
 @implements IDisposable
 
 <style>
@@ -41,10 +42,10 @@
                         if (recentlyViewedBriefing == null) continue;
                         
                         <div class="recent-item item-viewed">
-                            <a href="/b/@recentlyViewedBriefing.Id" class="recent-item-body">
+                            <a href="/b/@recentlyViewedBriefing.StringId" class="recent-item-body">
                                 <div class="id-section">
                                     <strong>#</strong>
-                                    @recentlyViewedBriefing.Id
+                                    @ShortenedBriefingIds.Shorten(recentlyViewedBriefing.StringId)
                                 </div>
                                 <div class="info-section">
                                     @if (!recentlyViewedBriefing.IsPrivate)
@@ -79,10 +80,10 @@
                         if (recentlyCreatedBriefing == null) continue;
 
                         <div class="recent-item item-viewed">
-                            <a href="/b/@recentlyCreatedBriefing.Id" class="recent-item-body">
+                            <a href="/b/@recentlyCreatedBriefing.StringId" class="recent-item-body">
                                 <div class="id-section">
                                     <strong>#</strong>
-                                    @recentlyCreatedBriefing.Id
+                                    @ShortenedBriefingIds.Shorten(recentlyCreatedBriefing.StringId)
                                 </div>
                                 <div class="info-section">
                                     @if (!recentlyCreatedBriefing.IsPrivate)
@@ -138,8 +139,8 @@
 
     private async void InitializeRecentBriefings()
     {
-        var recentlyViewedIds = (await _browserStorageJsModule.InvokeAsync<int[]>("getViewedBriefings")).ToList();
-        var recentlyCreatedIds = (await _browserStorageJsModule.InvokeAsync<int[]>("getCreatedBriefings")).ToList();
+        var recentlyViewedIds = (await _browserStorageJsModule.InvokeAsync<string[]>("getViewedBriefings")).ToList();
+        var recentlyCreatedIds = (await _browserStorageJsModule.InvokeAsync<string[]>("getCreatedBriefings")).ToList();
 
         if (recentlyViewedIds.Count > 5)
         {
@@ -150,8 +151,18 @@
             recentlyCreatedIds = recentlyCreatedIds.Where((_, i) => i < 5).ToList();
         }
         
-        _recentlyViewed = (await Task.WhenAll(recentlyViewedIds.ConvertAll(async id => await ApiService.GetBriefing(id)))).ToList();
-        _recentlyCreated = (await Task.WhenAll(recentlyCreatedIds.ConvertAll(async id => await ApiService.GetBriefing(id)))).ToList();
+        _recentlyViewed = (await Task.WhenAll(recentlyViewedIds.ConvertAll(async id =>
+        {
+            var briefing = await ApiService.GetBriefing(id);
+            briefing.StringId = id;
+            return briefing;
+        }))).ToList();
+        _recentlyCreated = (await Task.WhenAll(recentlyCreatedIds.ConvertAll(async id =>
+        {
+            var briefing = await ApiService.GetBriefing(id);
+            briefing.StringId = id;
+            return briefing;
+        }))).ToList();
 
         _recentlyViewed.Reverse();
         _recentlyCreated.Reverse();

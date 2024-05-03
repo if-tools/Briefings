@@ -2,6 +2,7 @@
 @page "/b"
 
 @using IFToolsBriefings.Client.Services
+@using IFToolsBriefings.Shared
 @using IFToolsBriefings.Shared.Data.Types
 @using Newtonsoft.Json
 
@@ -22,12 +23,12 @@
         <img class="logo-image" alt="logo" src="images/logos/logo.png">
     </div>
     <div class="section section-description">
-        <h3 class="briefing-title">Briefing #@_actualBriefingId <a href="/b/@_actualBriefingId/edit"><span class="feather icon-edit"></span></a></h3>
+        <h3 class="briefing-title">Briefing #@ShortenedBriefingIds.Shorten(BriefingId) <a href="/b/@BriefingId/edit"><span class="feather icon-edit"></span></a></h3>
         <h3 class="briefing-airports">@_displayBriefing.Origin - @_displayBriefing.Destination</h3>
         <span class="briefing-author">@(!string.IsNullOrWhiteSpace(_displayBriefing.Author) ? $"Made by {_displayBriefing.Author}" : "Anonymous")</span>
     </div>
     <div class="section section-main-info">
-        <h4 class="section-title">Main Info</h4>
+        <h4 class="section-title">Flight Info</h4>
         <div class="main-info">
             <div class="main-info-item">
                 <span class="key">Server</span>
@@ -106,8 +107,8 @@
             {
                 @foreach (var attachment in _attachments)
                 {
-                    <a href="@GetPathForAttachment(attachment)" class="gallery-item">
-                        <img class="attachment-preview" alt="attachment" src="@GetPathForAttachment(attachment)">
+                    <a href="@attachment.FileUrl" class="gallery-item">
+                        <img class="attachment-preview" alt="attachment" src="@attachment.FileUrl">
                     </a>
                 }
             }
@@ -124,12 +125,10 @@
 </div>
 
 @code {
-
+    
     [Parameter]
     public string BriefingId { get; set; }
-
-    private int _actualBriefingId;
-
+    
     private Briefing _displayBriefing = Briefing.Default;
     private Briefing _briefing;
     private List<FileAttachment> _attachments = new();
@@ -147,7 +146,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (string.IsNullOrEmpty(BriefingId) || !int.TryParse(BriefingId, out _actualBriefingId))
+        if (string.IsNullOrEmpty(BriefingId))
         {
             NavManager.NavigateTo("/");
             
@@ -156,7 +155,7 @@
         
         CurrentPage.SetCurrentPageName($"#{BriefingId} - Briefings");
 
-        var briefingExists = await ApiService.CheckIfBriefingExists(_actualBriefingId);
+        var briefingExists = await ApiService.CheckIfBriefingExists(BriefingId);
         if (!briefingExists)
         {
             NavManager.NavigateTo("/");
@@ -164,11 +163,11 @@
             return;
         }
         
-        _authenticated = await ApiService.CheckPassword(_actualBriefingId, null, "");
+        _authenticated = await ApiService.CheckPassword(BriefingId, null, "");
 
         if (_authenticated)
         {
-            _briefing = await ApiService.GetBriefing(_actualBriefingId);
+            _briefing = await ApiService.GetBriefing(BriefingId);
             
             _displayBriefing = _briefing;
             StateHasChanged();
@@ -191,7 +190,7 @@
                 await _generalJsModule.InvokeVoidAsync("initMagnificPopup");
             
             _browserStorageJsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/localStorage.js");
-            await _browserStorageJsModule.InvokeVoidAsync("addViewedBriefing", _actualBriefingId);
+            await _browserStorageJsModule.InvokeVoidAsync("addViewedBriefing", BriefingId);
         }
     }
     
@@ -199,9 +198,9 @@
     {
         if (string.IsNullOrWhiteSpace(password)) return;
         
-        if (await ApiService.CheckPassword(_actualBriefingId, null, password))
+        if (await ApiService.CheckPassword(BriefingId, null, password))
         {
-            _briefing = await ApiService.GetBriefing(_actualBriefingId, password);
+            _briefing = await ApiService.GetBriefing(BriefingId, password);
 
             _authenticated = true;
             _authModal.Hide();
@@ -213,7 +212,7 @@
         }
         else
         {
-            CurrentPage.ShowNotification("Wrong password.");
+            CurrentPage.ShowNotification("Password is incorrect.");
             return;
         }
             
@@ -232,12 +231,7 @@
         
         StateHasChanged();
     }
-
-    private string GetPathForAttachment(FileAttachment attachment)
-    {
-        return BaseAttachmentsPath + attachment.FileName;
-    }
-
+    
     private async void AddAttachments()
     {
         if (!string.IsNullOrWhiteSpace(_briefing.Attachments))

@@ -1,21 +1,53 @@
 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>IFToolsBriefings.Client</RootNamespace>
     <AssemblyName>IF-ToolsBriefings.Client</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web.Extensions" Version="5.0.0-preview9.20513.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.4" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.4" PrivateAssets="all" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.4" PrivateAssets="all" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.Net.Http.Json" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Shared\IF-Tools Briefings.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Properties\launchSettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Pages\About.razor" />
+    <_ContentIncludedByDefault Remove="Pages\EditBriefing.razor" />
+    <_ContentIncludedByDefault Remove="Pages\FindBriefing.razor" />
+    <_ContentIncludedByDefault Remove="Pages\Index.razor" />
+    <_ContentIncludedByDefault Remove="Pages\NewBriefing.razor" />
+    <_ContentIncludedByDefault Remove="Pages\ViewBriefing.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="Components\Pages\About.razor" />
+    <AdditionalFiles Include="Components\Pages\EditBriefing.razor" />
+    <AdditionalFiles Include="Components\Pages\FindBriefing.razor" />
+    <AdditionalFiles Include="Components\Pages\Index.razor" />
+    <AdditionalFiles Include="Components\Pages\NewBriefing.razor" />
+    <AdditionalFiles Include="Components\Pages\ViewBriefing.razor" />
+    <AdditionalFiles Include="Components\Shared\AuthenticationModal.razor" />
+    <AdditionalFiles Include="Components\Shared\BriefingLayout.razor" />
+    <AdditionalFiles Include="Components\Shared\GetFlightPlanModal.razor" />
+    <AdditionalFiles Include="Components\Shared\HelpTooltip.razor" />
+    <AdditionalFiles Include="Components\Shared\InfoDialog.razor" />
+    <AdditionalFiles Include="Components\Shared\LoadingIndicator.razor" />
+    <AdditionalFiles Include="Components\Shared\MainLayout.razor" />
+    <AdditionalFiles Include="Components\Shared\NavMenu.razor" />
+    <AdditionalFiles Include="Components\Shared\NotFoundPage.razor" />
+    <AdditionalFiles Include="Components\Shared\TimeSelect.razor" />
   </ItemGroup>
 
 </Project>

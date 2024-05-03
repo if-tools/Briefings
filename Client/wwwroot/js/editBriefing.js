@@ -36,7 +36,17 @@ export function unregisterEvents() {
 export function getFilepondFileIds() {
     let result = [];
 
-    FilePond.find(document.querySelector(".filepond")).getFiles().forEach(entry => result.push(entry.serverId));
+    FilePond.find(document.querySelector(".filepond"))
+        .getFiles()
+        .forEach(entry => {
+            if(entry.file.lastModified !== undefined) {
+                // entry is File, meaning it was just uploaded
+                result.push(entry.serverId);
+            } else {
+                // entry is Blob, meaning it was fetched from S3
+                result.push(entry.filename.split(".")[0]);
+            }
+        });
     
     return result.filter(i => i != null);
 }

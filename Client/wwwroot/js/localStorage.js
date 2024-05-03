@@ -39,7 +39,7 @@ export function getViewedBriefings() {
     let split = raw.split(",");
     if(split === null || split.length <= 0) return null;
 
-    return split.map(stringId => parseInt(stringId, 10));
+    return split;
 }
 
 export function getCreatedBriefings() {
@@ -49,7 +49,7 @@ export function getCreatedBriefings() {
     let split = raw.split(",");
     if(split === null || split.length <= 0) return null;
 
-    return split.map(stringId => parseInt(stringId, 10));
+    return split;
 }
 
 function setViewedBriefings(briefingIds) {

@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.S3;
+using Amazon.S3.Model;
 using IFToolsBriefings.Server.Data;
 using IFToolsBriefings.Shared.Data.Models;
 using Microsoft.AspNetCore.Http;
@@ -12,42 +14,50 @@ namespace IFToolsBriefings.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AttachmentController : Controller
+    public class AttachmentController(DatabaseContext databaseContext, IAmazonS3 s3Client) : Controller
     {
-        private const string BaseAttachmentsPath = "wwwroot/images/attachments";
-        private readonly DatabaseContext _databaseContext = new();
-
+        private readonly string _s3BucketName = Environment.GetEnvironmentVariable("AWS_S3_BUCKET_NAME");
+        private long MaxBucketSize = 5000000000;
+        
         [HttpPost("[action]")]
         public async Task<ActionResult> Create(IFormFile file)
         {
             if (file == null) return BadRequest("File is null.");
-
+            
+            var totalSize = await databaseContext.AttachmentsTotalSize.FirstOrDefaultAsync();
+            if (totalSize == null)
+            {
+                var result = await databaseContext.AddAsync(new AttachmentsTotalSize());
+                totalSize = result.Entity;
+            }
+            if (totalSize.Size >= MaxBucketSize)
+            {
+                return BadRequest("Exceeded maximum allowed storage size.");
+            }
+            
             var attachment = new FileAttachment();
-            
-            CheckAttachmentsDirectory();
-            
             attachment.Guid = Guid.NewGuid().ToString();
-            
             var fileType = file.FileName.Split('.').LastOrDefault();
-            attachment.FileName = attachment.Guid + "." + (fileType ?? "png");
+            attachment.FileName = attachment.Guid + "." + (fileType?.ToLower() ?? "png");
+
+            var request = new PutObjectRequest
+            {
+                BucketName = _s3BucketName,
+                Key = attachment.FileName,
+                InputStream = file.OpenReadStream(),
+            };
+            
+            request.Metadata.Add("Content-Type", file.ContentType);
+            await s3Client.PutObjectAsync(request);
             
             attachment.CreatedOn = DateTime.Now;
             attachment.FileSize = file.Length;
+            
+            // increment total size of attachments
+            totalSize.Size += attachment.FileSize;
 
-            await using (var memoryStream = new MemoryStream())
-            {
-                await file.CopyToAsync(memoryStream);
-                memoryStream.Seek(0, SeekOrigin.Begin);
-
-                await using (var fs = new FileStream(Path.Combine(BaseAttachmentsPath, attachment.FileName), FileMode.OpenOrCreate))
-                {
-                    await memoryStream.CopyToAsync(fs);
-                    fs.Flush();
-                }
-            }
-
-            await _databaseContext.Attachments.AddAsync(attachment);
-            await _databaseContext.SaveChangesAsync();
+            await databaseContext.Attachments.AddAsync(attachment);
+            await databaseContext.SaveChangesAsync();
                 
             return Ok(attachment.Guid);
         }
@@ -55,76 +65,31 @@ namespace IFToolsBriefings.Server.Controllers
         [HttpDelete("[action]")]
         public async Task<ActionResult> Revert()
         {
-            CheckAttachmentsDirectory();
-            
             string content;
             using (StreamReader sr = new StreamReader(Request.Body))
             {
                 content = await sr.ReadToEndAsync();
             }
             
-            var attachment = _databaseContext.Attachments.SingleOrDefault(i => i.Guid == content);
-            if (attachment == null) return NotFound("File does not exist.");
-            
-            try
-            {
-                System.IO.File.Delete(Path.Combine(BaseAttachmentsPath, attachment.FileName));
-                
-                attachment.Deleted = true;
-                
-                await _databaseContext.SaveChangesAsync();
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                return BadRequest($"Error encountered on server. Message:'{e.Message}' when writing an object.");
-            }
-        }
-
-        [HttpDelete("[action]")]
-        public async Task<ActionResult> Remove(string id)
-        {
-            CheckAttachmentsDirectory();
-            
-            var attachment = _databaseContext.Attachments.SingleOrDefault(i => i.Guid == id);
+            var attachment = databaseContext.Attachments.SingleOrDefault(i => i.Guid == content);
             if (attachment == null) return NotFound("File does not exist.");
 
-            try
+            var request = new DeleteObjectRequest
             {
-                System.IO.File.Delete(Path.Combine(BaseAttachmentsPath, attachment.FileName));
-
-                attachment.Deleted = true;
-                
-                await _databaseContext.SaveChangesAsync();
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                return BadRequest($"Error encountered on server. Message:'{e.Message}' when writing an object.");
-            }
-        }
-        
-        [HttpGet("[action]")]
-        public async Task<ActionResult> Load(string id)
-        {
-            var attachment = await _databaseContext.Attachments.SingleOrDefaultAsync(i => i.Guid == id);
-            if (attachment == null) return NotFound("File does not exist.");
-
-            string fileName = attachment.FileName;
-            string fileType = fileName.Split('.')[1];
-
-            if (!System.IO.File.Exists(Path.Combine(BaseAttachmentsPath, fileName)))
-                return BadRequest("Sorry, that file does not exist on the server.");
+                BucketName = _s3BucketName,
+                Key = attachment.FileName
+            };
+            await s3Client.DeleteObjectAsync(request);
             
-            return File(new FileStream(Path.Combine(BaseAttachmentsPath, fileName), FileMode.Open), fileType == "png" ? "image/png" : "image/jpeg", fileName);        
-        }
-
-        private void CheckAttachmentsDirectory()
-        {
-            if (!Directory.Exists(BaseAttachmentsPath))
-            {
-                Directory.CreateDirectory(BaseAttachmentsPath);
-            }
+            // decrement total size of attachments
+            var totalSize = await databaseContext.AttachmentsTotalSize.FirstAsync();
+            totalSize.Size -= attachment.FileSize;
+            
+            databaseContext.Attachments.Remove(attachment);
+            
+            await databaseContext.SaveChangesAsync();
+            
+            return Ok();
         }
     }
 }

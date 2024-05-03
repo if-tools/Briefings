@@ -3,3 +3,5 @@ obj/
 bin/
 **/attachments/*
 .publish
+.env
+.DS_Store

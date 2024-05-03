@@ -2,39 +2,43 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.S3;
+using Amazon.S3.Model;
 using IFToolsBriefings.Server.Data;
 using IFToolsBriefings.Shared.Data.Models;
 using IFToolsBriefings.Shared.Data.Types;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
 using Newtonsoft.Json;
 
 namespace IFToolsBriefings.Server.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class ApiController : Controller
+    public class ApiController(DatabaseContext databaseContext, IAmazonS3 s3Client) : Controller
     {
-        private readonly DatabaseContext _databaseContext = new ();
+        private static readonly string S3BucketName = Environment.GetEnvironmentVariable("AWS_S3_BUCKET_NAME");
+        private static readonly string S3BucketBasePath = "https://" + S3BucketName + ".s3.amazonaws.com/{0}";
         
         [HttpGet("[action]")]
-        public async Task<ActionResult<bool>> CheckIfBriefingExists(int id)
+        public async Task<ActionResult<bool>> CheckIfBriefingExists(string id)
         {
-            var briefing = await _databaseContext.Briefings.SingleOrDefaultAsync(entity => entity.Id == id);
+            var briefing = await databaseContext.Briefings.SingleOrDefaultAsync(entity => entity.Id.ToString() == id.ToString());
             
             return briefing != null;
         }
         
         [HttpGet("[action]")]
-        public async Task<ActionResult<Briefing>> GetBriefing(int id, string viewPassword = null)
+        public async Task<ActionResult<Briefing>> GetBriefing(string id, string viewPassword = null)
         {
-            var briefing = await _databaseContext.Briefings.SingleOrDefaultAsync(entity => entity.Id == id);
+            var briefing = await databaseContext.Briefings.SingleOrDefaultAsync(entity => entity.Id.ToString() == id);
             if (briefing == null) return NotFound();
 
             if (briefing.IsPrivate)
             {
                 // let the caller know that this briefing is private
-                if (string.IsNullOrEmpty(viewPassword)) return new Briefing { Id = id, ViewPasswordHash = "notnull" };
+                if (string.IsNullOrEmpty(viewPassword)) return new Briefing { Id = ObjectId.Parse(id), ViewPasswordHash = "notnull" };
                 if (!PasswordHasher.Check(briefing.ViewPasswordHash, viewPassword)) return Unauthorized();
             }
 
@@ -42,11 +46,11 @@ namespace IFToolsBriefings.Server.Controllers
         }
         
         [HttpGet("[action]")]
-        public async Task<ActionResult<Briefing>> GetBriefingToEdit(int id, string editPassword)
+        public async Task<ActionResult<Briefing>> GetBriefingToEdit(string id, string editPassword)
         {
             if (string.IsNullOrEmpty(editPassword)) return BadRequest();
             
-            var briefing = await _databaseContext.Briefings.SingleOrDefaultAsync(entity => entity.Id == id);
+            var briefing = await databaseContext.Briefings.SingleOrDefaultAsync(entity => entity.Id.ToString() == id.ToString());
             if (briefing == null) return NotFound();
 
             if (!PasswordHasher.Check(briefing.EditPasswordHash, editPassword))
@@ -58,9 +62,9 @@ namespace IFToolsBriefings.Server.Controllers
         }
         
         [HttpGet("[action]")]
-        public async Task<ActionResult<Briefing[]>> GetBriefings(BriefingSearchMethod searchMethod, string query)
+        public ActionResult<Briefing[]> GetBriefings(BriefingSearchMethod searchMethod, string query)
         {
-            var briefings = _databaseContext.Briefings.Where(entry => entry.ViewPasswordHash.Trim().Length == 0);
+            var briefings = databaseContext.Briefings.Where(entry => entry.ViewPasswordHash.Trim().Length == 0);
 
             IQueryable<Briefing> searchResults = null;
             switch (searchMethod)
@@ -92,11 +96,13 @@ namespace IFToolsBriefings.Server.Controllers
             newBriefing.ViewPasswordHash = string.IsNullOrEmpty(newBriefing.ViewPassword)
                 ? ""
                 : PasswordHasher.Hash(newBriefing.ViewPassword);
-            
-            await _databaseContext.Briefings.AddAsync(newBriefing);
-            await _databaseContext.SaveChangesAsync();
 
-            return Ok(newBriefing.Id);
+            newBriefing.Id = ObjectId.GenerateNewId();
+            newBriefing.StringId = newBriefing.Id.ToString();
+            
+            await databaseContext.Briefings.AddAsync(newBriefing);
+            await databaseContext.SaveChangesAsync();
+            return Ok(newBriefing.Id.ToString());
         }
         
         [HttpPost("[action]")]
@@ -107,7 +113,7 @@ namespace IFToolsBriefings.Server.Controllers
 
             var editedBriefing = parameters.EditedBriefing;
             
-            var originalBriefing = await _databaseContext.Briefings.SingleOrDefaultAsync(entry => entry.Id == parameters.Id);
+            var originalBriefing = await databaseContext.Briefings.SingleOrDefaultAsync(entry => entry.Id.ToString() == parameters.Id);
             if (originalBriefing == null) return NotFound();
 
             if (!PasswordHasher.Check(originalBriefing.EditPasswordHash, parameters.EditPassword))
@@ -116,19 +122,43 @@ namespace IFToolsBriefings.Server.Controllers
             editedBriefing.ViewPasswordHash = editedBriefing.ViewPassword == "none"
                 ? ""
                 : string.IsNullOrWhiteSpace(editedBriefing.ViewPassword) ? editedBriefing.ViewPasswordHash : PasswordHasher.Hash(editedBriefing.ViewPassword);
+
+            var removedAttachments = originalBriefing.AttachmentsArray.Except(editedBriefing.AttachmentsArray).ToList();
             
-            _databaseContext.Entry(originalBriefing).CurrentValues.SetValues(editedBriefing);
-            await _databaseContext.SaveChangesAsync();
+            var totalSize = await databaseContext.AttachmentsTotalSize.FirstAsync();
+            foreach (var a in removedAttachments)
+            {
+                var attachment = databaseContext.Attachments.SingleOrDefault(i => i.Guid == a);
+                if (attachment == null) continue;
+
+                var request = new DeleteObjectRequest
+                {
+                    BucketName = S3BucketName,
+                    Key = attachment.FileName
+                };
+                await s3Client.DeleteObjectAsync(request);
+
+                // decrement total size of attachments
+                totalSize.Size -= attachment.FileSize;
+                
+                databaseContext.Attachments.Remove(attachment);
+            }
+            
+            await databaseContext.SaveChangesAsync();
+            
+            editedBriefing.Id = originalBriefing.Id;
+            databaseContext.Entry(originalBriefing).CurrentValues.SetValues(editedBriefing);
+            await databaseContext.SaveChangesAsync();
 
             return Ok();
         }
 
         [HttpGet("[action]")]
-        public async Task<ActionResult<bool>> CheckPassword(int id, string editPassword = null, string viewPassword = null)
+        public async Task<ActionResult<bool>> CheckPassword(string id, string editPassword = null, string viewPassword = null)
         {
             if (!string.IsNullOrEmpty(editPassword) && !string.IsNullOrEmpty(viewPassword)) return BadRequest();
             
-            var briefing = await _databaseContext.Briefings.SingleOrDefaultAsync(entity => entity.Id == id);
+            var briefing = await databaseContext.Briefings.SingleOrDefaultAsync(entity => entity.Id.ToString() == id.ToString());
             if (briefing == null) return NotFound();
 
             if (!string.IsNullOrEmpty(editPassword))
@@ -157,9 +187,11 @@ namespace IFToolsBriefings.Server.Controllers
             
             foreach (var guid in guids)
             {
-                var attachment = await _databaseContext.Attachments.SingleOrDefaultAsync(entity => entity.Guid == guid);
+                var attachment = await databaseContext.Attachments.SingleOrDefaultAsync(entity => entity.Guid == guid);
+                if (attachment == null) continue;
                 
-                if(attachment != null) attachments.Add(attachment);
+                attachment.FileUrl = string.Format(S3BucketBasePath, attachment.FileName);
+                attachments.Add(attachment);
             }
 
             return attachments.ToArray();
@@ -168,7 +200,7 @@ namespace IFToolsBriefings.Server.Controllers
         [HttpGet("[action]")]
         public async Task<string> GetAppVersion()
         {
-            return JsonConvert.DeserializeObject<VersionFile>(await System.IO.File.ReadAllTextAsync("appVersion.json"))
+            return JsonConvert.DeserializeObject<VersionFile>(await System.IO.File.ReadAllTextAsync("version.json"))
                 ?.Version ?? "N/A";
         }
     }
