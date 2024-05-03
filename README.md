@@ -35,7 +35,7 @@ If you want to use MongoDB Atlas, you only need to specify your connection strin
 - .NET 8.0
 
 #### Instructions:
-1. Build and run the app using
+1. Go into `Server` and build and run the app using
    ```bash
    $ dotnet run
    ```
